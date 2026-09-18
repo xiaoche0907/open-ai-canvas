@@ -60,6 +60,16 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    extra_hosts:
+      - "localhost:host-gateway"
+    depends_on:
+      web:
+        condition: service_healthy
+
 volumes:
   backend-data:
   updater-socket:

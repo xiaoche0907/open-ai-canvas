@@ -18,12 +18,35 @@ services:
       CANVAS_REGISTRATION_ENABLED: ${CANVAS_REGISTRATION_ENABLED:-false}
       CANVAS_ALLOW_PRIVATE_UPSTREAMS: ${CANVAS_ALLOW_PRIVATE_UPSTREAMS:-false}
       CANVAS_ALLOWED_PRIVATE_UPSTREAM_HOSTS: ${CANVAS_ALLOWED_PRIVATE_UPSTREAM_HOSTS:-}
-      CANVAS_CORS_ORIGINS: ${CANVAS_CORS_ORIGINS:-http://localhost:3000}
+      CANVAS_CORS_ORIGINS: ${CANVAS_CORS_ORIGINS:-http://localhost:3001}
+      CANVAS_UPDATER_SOCKET: /run/open-ai-canvas-updater/updater.sock
+      CANVAS_UPDATER_TOKEN: ${CANVAS_UPDATER_TOKEN:-9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d}
       GIN_MODE: release
     volumes:
       - backend-data:/data
+      - updater-socket:/run/open-ai-canvas-updater
     restart: unless-stopped
     stop_grace_period: ${CANVAS_SHUTDOWN_TIMEOUT:-10m}
+
+  updater:
+    image: alpine:3.22
+    environment:
+      CANVAS_UPDATER_SOCKET: /run/open-ai-canvas-updater/updater.sock
+      CANVAS_UPDATER_TOKEN: ${CANVAS_UPDATER_TOKEN:-9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d}
+      CANVAS_UPDATER_INSTALL_DIR: /app
+      CANVAS_UPDATER_ENV_FILE: .env
+      CANVAS_UPDATER_COMPOSE_FILE: docker-compose.yml
+      CANVAS_UPDATER_BACKUP_DIR: /var/lib/open-ai-canvas-updater/backups
+      CANVAS_UPDATER_STATE_DIR: /var/lib/open-ai-canvas-updater/state
+      CANVAS_UPDATER_SELF_UPDATE: "false"
+      CANVAS_UPDATER_HEALTH_URL: http://web:3000/api/health/ready
+    volumes:
+      - ./.local/bin/open-ai-canvas-host-updater:/usr/local/bin/open-ai-canvas-host-updater:ro
+      - updater-socket:/run/open-ai-canvas-updater
+      - .:/app:ro
+      - updater-state:/var/lib/open-ai-canvas-updater
+    command: ["/usr/local/bin/open-ai-canvas-host-updater"]
+    restart: unless-stopped
 
   web:
     image: open-ai-canvas-web:local
@@ -31,7 +54,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "${CANVAS_HTTP_PORT:-3001}:3000"
     depends_on:
       backend:
         condition: service_healthy
@@ -39,3 +62,5 @@ services:
 
 volumes:
   backend-data:
+  updater-socket:
+  updater-state:

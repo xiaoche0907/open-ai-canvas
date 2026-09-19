@@ -1,0 +1,364 @@
+/* AI Applications Hub Styles */
+
+.ai-apps-container {
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 16px 20px 48px;
+}
+
+/* Toolbar & Filters */
+.ai-apps-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 28px;
+}
+
+.ai-apps-search-row {
+    display: flex;
+    align-items: center;
+    max-width: 520px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ai-apps-search-row:focus-within {
+    border-color: rgba(245, 158, 11, 0.6);
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15);
+}
+
+.ai-apps-type-trigger {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    height: 38px;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.03);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    user-select: none;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.ai-apps-type-trigger:hover {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.ai-apps-search-input {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 8px;
+}
+
+.ai-apps-search-input input {
+    flex: 1;
+    height: 38px;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-size: 13px;
+}
+
+.ai-apps-search-input input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.ai-apps-search-icon {
+    color: rgba(255, 255, 255, 0.4);
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+/* Category Pills */
+.ai-apps-pills {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.ai-apps-pill-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 14px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    user-select: none;
+}
+
+.ai-apps-pill-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+.ai-apps-pill-btn.is-active {
+    background: #ffffff;
+    color: #0d0e12;
+    border-color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* Sections */
+.ai-apps-section {
+    margin-bottom: 36px;
+}
+
+.ai-apps-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.ai-apps-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    letter-spacing: -0.01em;
+}
+
+.ai-apps-section-badge {
+    font-size: 11px;
+    padding: 1px 7px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 500;
+}
+
+/* Grid */
+.ai-apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+@media (min-width: 1440px) {
+    .ai-apps-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 1800px) {
+    .ai-apps-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+/* Card */
+.ai-app-card {
+    display: flex;
+    flex-direction: column;
+    background: #14161d;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.22s ease,
+                box-shadow 0.22s ease;
+    position: relative;
+}
+
+.ai-app-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(245, 158, 11, 0.45);
+    box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.6), 0 0 16px -2px rgba(245, 158, 11, 0.12);
+}
+
+/* Card Banner */
+.ai-app-card-banner {
+    height: 140px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, #1c1f28 0%, #12141a 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ai-app-card-banner::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(245, 158, 11, 0.15), transparent 60%);
+    pointer-events: none;
+}
+
+.ai-app-card-banner-title {
+    position: relative;
+    z-index: 2;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.ai-app-card-banner-highlight {
+    color: #f59e0b;
+    margin-left: 2px;
+}
+
+/* Banner Mockup Diagram */
+.ai-app-card-diagram {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+    margin-bottom: 4px;
+    opacity: 0.88;
+}
+
+.ai-app-diagram-thumb {
+    width: 38px;
+    height: 48px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-app-diagram-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 9999px;
+    background: #f59e0b;
+    color: #000000;
+    font-size: 10px;
+    font-weight: 900;
+    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.35);
+}
+
+.ai-app-diagram-result {
+    width: 44px;
+    height: 52px;
+    border-radius: 6px;
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Quick Eye Action */
+.ai-app-card-eye-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 3;
+    width: 26px;
+    height: 26px;
+    border-radius: 9999px;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s;
+}
+
+.ai-app-card:hover .ai-app-card-eye-btn {
+    background: #f59e0b;
+    border-color: #f59e0b;
+    color: #000000;
+    transform: scale(1.08);
+}
+
+/* Card Body */
+.ai-app-card-body {
+    padding: 14px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.ai-app-card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+}
+
+.ai-app-card-desc {
+    font-size: 12px;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.55);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.ai-app-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ai-app-card-tag {
+    font-size: 11px;
+    color: rgba(245, 158, 11, 0.9);
+    background: rgba(245, 158, 11, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.ai-app-card-action-hint {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    transition: color 0.15s;
+}
+
+.ai-app-card:hover .ai-app-card-action-hint {
+    color: #f59e0b;
+}
+
+/* Empty search result */
+.ai-apps-empty {
+    text-align: center;
+    padding: 64px 20px;
+    color: rgba(255, 255, 255, 0.45);
+}

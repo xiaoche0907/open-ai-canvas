@@ -44,6 +44,7 @@ const CanvasProjectPage = lazy(loadCanvasProjectPage);
 const SharedCanvasPage = lazy(() => import("@/pages/canvas/shared"));
 const CreatePage = lazy(loadCreatePage);
 const NotFound = lazy(() => import("@/pages/not-found"));
+const AiAppsPage = lazy(() => import("@/pages/apps"));
 const SkillsPage = lazy(() => import("@/pages/skills"));
 const PluginsPage = lazy(() => import("@/pages/plugins"));
 const EagleLibraryPage = lazy(() => import("@/pages/plugins/eagle"));
@@ -114,6 +115,7 @@ export const router = createBrowserRouter([
                 ),
             },
             { path: "/assets", element: <RequireAuth>{deferred(<AssetsPage />)}</RequireAuth> },
+            { path: "/apps", element: <RequireAuth>{deferred(<AiAppsPage />)}</RequireAuth> },
             { path: "/skills", element: <RequireAuth>{deferred(<SkillsPage />)}</RequireAuth> },
             {
                 path: "/plugins",

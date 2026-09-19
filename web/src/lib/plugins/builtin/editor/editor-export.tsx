@@ -8,6 +8,7 @@ import { useEditorHostContext, useEditorStoreContext } from "@/components/editor
 import { buildTimelineRenderPlan, type TimelineRenderSource } from "@/lib/timeline/timeline-to-ffmpeg";
 import { exportTimelineToMp4, type TimelineExportProgress } from "@/lib/timeline/timeline-export";
 import { resourceFileUrl } from "@/services/api/resources";
+import { downloadMediaFile } from "@/lib/media-download";
 import { waitForGenerationTask } from "@/services/api/task-center";
 import { createTimelineRenderTask, type TimelineRenderResult } from "@/services/api/timeline-tasks";
 import type { TimelineProject } from "@/types/timeline";
@@ -201,14 +202,14 @@ export function EditorExport() {
                         <video src={resourceFileUrl(state.result.resourceId)} controls className="aspect-video w-full bg-black" />
                         <div className="flex items-center justify-between gap-2 px-2 py-1.5 text-[11px] text-[var(--director-dock-fg)]/80">
                             <span className="truncate">{state.result.fileName ?? "timeline.mp4"}</span>
-                            <a
-                                href={resourceFileUrl(state.result.resourceId)}
-                                download={state.result.fileName ?? "timeline.mp4"}
+                            <button
+                                type="button"
+                                onClick={() => void downloadMediaFile(resourceFileUrl(state.result!.resourceId), state.result!.fileName ?? "timeline.mp4")}
                                 className="flex shrink-0 items-center gap-1 text-[var(--director-accent)] hover:underline"
                             >
                                 <Download className="size-3" />
                                 下载
-                            </a>
+                            </button>
                         </div>
                     </div>
                 )}

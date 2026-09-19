@@ -24,6 +24,7 @@ import { resolveMediaUrl } from "@/services/file-storage";
 import { LocalRuntimeClientError } from "@/services/local-runtime-session";
 import { useLocalRuntimeStore } from "@/stores/use-local-runtime-store";
 import { CanvasNodeType, type CanvasNodeData } from "@/types/canvas";
+import { downloadMediaFile } from "@/lib/media-download";
 
 import { useCanvasNodeActions } from "../canvas-node-action-context";
 import { useUpstreamNodes } from "../canvas-node-graph-context";
@@ -252,10 +253,7 @@ export function MediaConversionNodeContent({ node, theme }: MediaConversionNodeC
 
     const downloadResult = () => {
         if (!resultUrl) return;
-        const link = document.createElement("a");
-        link.href = resultUrl;
-        link.download = `${node.title || "转换结果"}-${state.operation}.png`;
-        link.click();
+        void downloadMediaFile(resultUrl, `${node.title || "转换结果"}-${state.operation}.png`);
     };
 
     const effectiveResult = Boolean(resultUrl && (status === "completed" || status === "stale"));

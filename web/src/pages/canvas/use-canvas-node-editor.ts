@@ -211,8 +211,12 @@ export function useCanvasNodeEditor({
                 // Fall back to content URL
             }
         }
-        void downloadMediaFile(node.metadata.content, fileName);
-    }, [canvasTitle]);
+        try {
+            await downloadMediaFile(node.metadata.content, fileName);
+        } catch (error) {
+            message.error(error instanceof Error ? error.message : "下载媒体失败，请重试");
+        }
+    }, [canvasTitle, message]);
 
     const saveNodeAsset = useCallback(async (node: CanvasNodeData) => {
         if (node.type !== CanvasNodeType.Text && node.type !== CanvasNodeType.Image && node.type !== CanvasNodeType.Video && node.type !== CanvasNodeType.Audio) return message.error("当前节点类型不能保存为素材");

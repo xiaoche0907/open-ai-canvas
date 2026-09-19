@@ -71,11 +71,43 @@ function inferFileExtension(source?: string): string | undefined {
  */
 export function toProxyUrl(source: string): string {
     if (typeof source !== "string") return source;
-    const match = source.match(/^https?:\/\/img\.xcstudio\.pw\/(.*)$/i);
-    if (match) {
-        return `/media-proxy/${match[1]}`;
+    // 1. img.xcstudio.pw URLs -> same-origin /media-proxy/
+    const imgMatch = source.match(/^https?:\/\/img\.xcstudio\.pw\/(.*)$/i);
+    if (imgMatch) {
+        return `/media-proxy/${imgMatch[1]}`;
+    }
+    // 2. /resources/:id/file?direct=1 -> force proxy=1 so the backend streams directly with attachment header
+    if (source.includes("/resources/") && source.includes("/file")) {
+        try {
+            const urlObj = new URL(source, window.location.href);
+            if (urlObj.searchParams.get("direct") === "1" || !urlObj.searchParams.has("proxy")) {
+                urlObj.searchParams.delete("direct");
+                urlObj.searchParams.set("proxy", "1");
+                return urlObj.toString();
+            }
+        } catch {
+            return source.replace(/([?&])direct=1(&|$)/, "$1proxy=1$2");
+        }
     }
     return source;
+}
+
+function triggerBlobDownload(blob: Blob, fileName: string): void {
+    const blobUrl = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = blobUrl;
+    anchor.download = fileName;
+    anchor.style.display = "none";
+    document.body.appendChild(anchor);
+    anchor.click();
+    setTimeout(() => {
+        try {
+            document.body.removeChild(anchor);
+            URL.revokeObjectURL(blobUrl);
+        } catch {
+            // Ignore if already removed
+        }
+    }, 40000);
 }
 
 function imageToBlob(imgUrl: string): Promise<Blob> {
@@ -114,6 +146,7 @@ function imageToBlob(imgUrl: string): Promise<Blob> {
 
 /**
  * Downloads a media file (remote URL, Blob, data URL, or blob URL) to the user's filesystem.
+ * Never navigates the current window or opens a new tab.
  */
 export async function downloadMediaFile(
     source: string | Blob | undefined | null,
@@ -123,33 +156,52 @@ export async function downloadMediaFile(
 
     if (source instanceof Blob) {
         const finalName = resolveDownloadFileName(undefined, fileName, source.type);
-        saveAs(source, finalName);
+        triggerBlobDownload(source, finalName);
         return;
     }
 
     if (typeof source === "string" && (source.startsWith("data:") || source.startsWith("blob:"))) {
         const finalName = resolveDownloadFileName(source, fileName);
-        saveAs(source, finalName);
-        return;
-    }
-
-    // 1. If it's an img.xcstudio.pw resource, try the same-origin /media-proxy/ route first
-    const proxyUrl = toProxyUrl(source);
-    if (proxyUrl !== source) {
+        if (source.startsWith("blob:")) {
+            const anchor = document.createElement("a");
+            anchor.href = source;
+            anchor.download = finalName;
+            anchor.style.display = "none";
+            document.body.appendChild(anchor);
+            anchor.click();
+            setTimeout(() => document.body.removeChild(anchor), 1000);
+            return;
+        }
+        // Convert data URL to blob
         try {
-            const response = await fetch(proxyUrl, { cache: "no-store" });
-            if (response.ok) {
-                const blob = await response.blob();
-                const finalName = resolveDownloadFileName(source, fileName, blob.type);
-                saveAs(blob, finalName);
-                return;
-            }
-        } catch (proxyError) {
-            console.warn("[downloadMediaFile] Same-origin media proxy fetch failed, falling back to direct fetch:", proxyError);
+            const res = await fetch(source);
+            const blob = await res.blob();
+            triggerBlobDownload(blob, finalName);
+            return;
+        } catch {
+            saveAs(source, finalName);
+            return;
         }
     }
 
-    // 2. Direct fetch with cache-busting to bypass Chrome tainted image cache
+    // 1. If it's an img.xcstudio.pw resource or backend resource, try the proxy URL first
+    const proxyUrl = toProxyUrl(source);
+    if (proxyUrl !== source) {
+        try {
+            const response = await fetch(proxyUrl, { cache: "no-store", credentials: "include" });
+            const contentType = response.headers.get("content-type") || "";
+            if (response.ok && !contentType.includes("text/html")) {
+                const blob = await response.blob();
+                const finalName = resolveDownloadFileName(source, fileName, blob.type);
+                triggerBlobDownload(blob, finalName);
+                return;
+            }
+        } catch (proxyError) {
+            console.warn("[downloadMediaFile] Media proxy fetch failed, trying fallbacks:", proxyError);
+        }
+    }
+
+    // 2. Direct fetch with cache-busting
     try {
         let fetchUrl = source;
         if (typeof source === "string" && (source.startsWith("http://") || source.startsWith("https://"))) {
@@ -161,10 +213,11 @@ export async function downloadMediaFile(
             mode: "cors",
             cache: "no-store",
         });
-        if (response.ok) {
+        const contentType = response.headers.get("content-type") || "";
+        if (response.ok && !contentType.includes("text/html")) {
             const blob = await response.blob();
             const finalName = resolveDownloadFileName(source, fileName, blob.type);
-            saveAs(blob, finalName);
+            triggerBlobDownload(blob, finalName);
             return;
         }
     } catch (fetchError) {
@@ -180,32 +233,28 @@ export async function downloadMediaFile(
         try {
             const blob = await imageToBlob(proxyUrl);
             const finalName = resolveDownloadFileName(source, fileName, blob.type);
-            saveAs(blob, finalName);
+            triggerBlobDownload(blob, finalName);
             return;
         } catch (canvasError) {
             console.warn("[downloadMediaFile] Canvas fallback failed:", canvasError);
         }
     }
 
-    // 4. Fallback: try direct fetch of original source
+    // 4. Try direct fetch of original source without cache buster
     try {
         const response = await fetch(source, { mode: "cors" });
-        if (response.ok) {
+        const contentType = response.headers.get("content-type") || "";
+        if (response.ok && !contentType.includes("text/html")) {
             const blob = await response.blob();
             const finalName = resolveDownloadFileName(source, fileName, blob.type);
-            saveAs(blob, finalName);
+            triggerBlobDownload(blob, finalName);
             return;
         }
     } catch {
         // Ignore
     }
 
-    // 5. Final fallback: anchor click on proxyUrl (same-origin so download attribute works)
-    const fallbackTarget = proxyUrl !== source ? proxyUrl : source;
-    const anchor = document.createElement("a");
-    anchor.href = fallbackTarget;
-    anchor.download = resolveDownloadFileName(source, fileName);
-    document.body.appendChild(anchor);
-    anchor.click();
-    document.body.removeChild(anchor);
+    // 5. DO NOT navigate to the cross-origin URL. Throw an error so caller can display message.error
+    throw new Error("媒体文件下载失败，无法跨域获取文件流。请刷新页面或检查网络。");
 }
+

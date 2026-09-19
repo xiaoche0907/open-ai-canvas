@@ -18,6 +18,10 @@
       "destination": "https://img.xcstudio.pw/:path*"
     },
     {
+      "source": "/api/(.*)",
+      "destination": "https://api.xcstudio.pw/api/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

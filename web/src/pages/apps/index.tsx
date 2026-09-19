@@ -296,11 +296,11 @@ export default function AiAppsPage() {
                                             {/* 流程图示示意 */}
                                             <div className="ai-app-card-diagram">
                                                 <div className="ai-app-diagram-thumb">
-                                                    <div className="w-4 h-5 rounded-[2px] bg-white/20 border border-white/20" />
+                                                    <div className="w-4 h-5 rounded-[2px] bg-foreground/20 border border-foreground/15" />
                                                 </div>
                                                 <div className="ai-app-diagram-arrow">➔</div>
                                                 <div className="ai-app-diagram-result">
-                                                    <Sparkles className="size-3 text-amber-400" />
+                                                    <Sparkles className="size-3 text-amber-500" />
                                                 </div>
                                             </div>
 
@@ -366,33 +366,33 @@ export default function AiAppsPage() {
                 className="ai-app-detail-modal"
             >
                 {activeTool && (
-                    <div className="flex flex-col gap-5 text-white p-6 bg-[#14161f] rounded-2xl border border-white/10">
+                    <div className="ai-app-modal-content">
                         <div className="flex items-start justify-between gap-4">
                             <div>
                                 <div className="flex items-center gap-2 mb-1.5">
-                                    <h3 className="text-xl font-bold text-white tracking-tight">{activeTool.title}</h3>
+                                    <h3 className="text-xl font-bold tracking-tight text-foreground">{activeTool.title}</h3>
                                     <Tag color="orange" className="border-0 font-medium">
                                         {activeTool.tag}
                                     </Tag>
                                 </div>
-                                <p className="text-sm leading-relaxed text-white/65">{activeTool.desc}</p>
+                                <p className="text-sm leading-relaxed text-foreground/65">{activeTool.desc}</p>
                             </div>
                         </div>
 
                         {/* 提示词预设预览 */}
-                        <div className="p-3.5 rounded-lg bg-white/[0.04] border border-white/[0.08] flex flex-col gap-2">
-                            <div className="flex items-center justify-between text-xs text-white/50">
+                        <div className="ai-app-prompt-box">
+                            <div className="flex items-center justify-between text-xs text-foreground/50">
                                 <span>推荐商用指令 / 提示词</span>
                                 <button
                                     type="button"
                                     onClick={() => handleCopyPrompt(activeTool.promptHint)}
-                                    className="flex items-center gap-1 text-amber-400 hover:text-amber-300 transition-colors"
+                                    className="flex items-center gap-1 text-amber-600 dark:text-amber-400 hover:text-amber-500 transition-colors"
                                 >
                                     {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
                                     <span>{copied ? "已复制" : "复制指令"}</span>
                                 </button>
                             </div>
-                            <p className="text-xs leading-relaxed text-white/85 font-mono bg-black/30 p-2.5 rounded border border-white/5">
+                            <p className="ai-app-prompt-text m-0">
                                 {activeTool.promptHint}
                             </p>
                         </div>
@@ -401,7 +401,6 @@ export default function AiAppsPage() {
                         <div className="flex items-center justify-end gap-3 pt-2">
                             <Button
                                 onClick={handleUseInCanvas}
-                                className="border-white/15 bg-white/5 text-white/80 hover:text-white hover:bg-white/10"
                             >
                                 在自由画布中打开
                             </Button>

@@ -26,4 +26,6 @@ web/out
 *.sqlite3
 .settings-key
 .env*
+**/.env*
+web/.env*
 !.env.example

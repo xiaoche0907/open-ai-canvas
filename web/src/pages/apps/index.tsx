@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router";
-import { Modal, Button, Tag } from "antd";
+import { Button, Tag } from "antd";
+import { AppModal } from "@/components/ui/product/app-modal";
 import {
     Search,
     ChevronDown,
@@ -8,16 +9,12 @@ import {
     Sparkles,
     Wand2,
     ArrowRight,
-    ShoppingBag,
     Copy,
     Check,
-    Boxes,
-    Layers,
-    ExternalLink
+    Boxes
 } from "lucide-react";
 
 import { WorkspacePage } from "@/components/layout/workspace-page";
-import { useAppearanceStore } from "@/stores/use-appearance-store";
 import "./apps.css";
 
 type CategoryKey = "all" | "fashion" | "video" | "architecture" | "food" | "lifestyle";
@@ -202,7 +199,6 @@ const SECTIONS: SectionConfig[] = [
 
 export default function AiAppsPage() {
     const navigate = useNavigate();
-    const appearance = useAppearanceStore((state) => state.appearance);
 
     const [selectedCategory, setSelectedCategory] = useState<CategoryKey>("all");
     const [searchQuery, setSearchQuery] = useState("");
@@ -300,7 +296,7 @@ export default function AiAppsPage() {
                                             {/* 流程图示示意 */}
                                             <div className="ai-app-card-diagram">
                                                 <div className="ai-app-diagram-thumb">
-                                                    <div className="w-4 h-5 rounded-xs bg-white/20 border border-white/20" />
+                                                    <div className="w-4 h-5 rounded-[2px] bg-white/20 border border-white/20" />
                                                 </div>
                                                 <div className="ai-app-diagram-arrow">➔</div>
                                                 <div className="ai-app-diagram-result">
@@ -360,24 +356,17 @@ export default function AiAppsPage() {
             </div>
 
             {/* 工具详情与启动弹窗 */}
-            <Modal
+            <AppModal
                 open={Boolean(activeTool)}
                 onCancel={() => setActiveTool(null)}
                 footer={null}
                 centered
+                flush
                 width={560}
                 className="ai-app-detail-modal"
-                styles={{
-                    content: {
-                        background: "#14161f",
-                        border: "1px solid rgba(255, 255, 255, 0.1)",
-                        borderRadius: 16,
-                        padding: 24,
-                    },
-                }}
             >
                 {activeTool && (
-                    <div className="flex flex-col gap-5 text-white">
+                    <div className="flex flex-col gap-5 text-white p-6 bg-[#14161f] rounded-2xl border border-white/10">
                         <div className="flex items-start justify-between gap-4">
                             <div>
                                 <div className="flex items-center gap-2 mb-1.5">
@@ -432,7 +421,7 @@ export default function AiAppsPage() {
                         </div>
                     </div>
                 )}
-            </Modal>
+            </AppModal>
         </WorkspacePage>
     );
 }

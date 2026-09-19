@@ -63,6 +63,21 @@ function inferFileExtension(source?: string): string | undefined {
     return undefined;
 }
 
+/**
+ * Converts img.xcstudio.pw URLs to same-origin /media-proxy/ URLs.
+ * On Vercel and Nginx, /media-proxy/ rewrites to https://img.xcstudio.pw/ so the browser
+ * fetches it as same-origin, completely eliminating CORS restrictions on any domain
+ * (including *.vercel.app preview branches).
+ */
+export function toProxyUrl(source: string): string {
+    if (typeof source !== "string") return source;
+    const match = source.match(/^https?:\/\/img\.xcstudio\.pw\/(.*)$/i);
+    if (match) {
+        return `/media-proxy/${match[1]}`;
+    }
+    return source;
+}
+
 function imageToBlob(imgUrl: string): Promise<Blob> {
     return new Promise((resolve, reject) => {
         const img = new Image();
@@ -99,14 +114,6 @@ function imageToBlob(imgUrl: string): Promise<Blob> {
 
 /**
  * Downloads a media file (remote URL, Blob, data URL, or blob URL) to the user's filesystem.
- *
- * Modern browsers ignore the `download` attribute on anchor tags when the URL is cross-origin
- * (such as `https://img.xcstudio.pw` vs `https://www.xcstudio.pw`), causing normal page navigation
- * instead of a file download.
- *
- * Additionally, if an image was already rendered via an `<img>` tag without crossOrigin, Chrome
- * caches the response as `no-cors`, causing subsequent `fetch(url, { mode: 'cors' })` to fail
- * due to cache collision. Adding `_cors_dl` cache-busting bypasses this cache collision.
  */
 export async function downloadMediaFile(
     source: string | Blob | undefined | null,
@@ -126,7 +133,23 @@ export async function downloadMediaFile(
         return;
     }
 
-    // 1. Fetch with cache-busting to bypass Chrome tainted image cache
+    // 1. If it's an img.xcstudio.pw resource, try the same-origin /media-proxy/ route first
+    const proxyUrl = toProxyUrl(source);
+    if (proxyUrl !== source) {
+        try {
+            const response = await fetch(proxyUrl, { cache: "no-store" });
+            if (response.ok) {
+                const blob = await response.blob();
+                const finalName = resolveDownloadFileName(source, fileName, blob.type);
+                saveAs(blob, finalName);
+                return;
+            }
+        } catch (proxyError) {
+            console.warn("[downloadMediaFile] Same-origin media proxy fetch failed, falling back to direct fetch:", proxyError);
+        }
+    }
+
+    // 2. Direct fetch with cache-busting to bypass Chrome tainted image cache
     try {
         let fetchUrl = source;
         if (typeof source === "string" && (source.startsWith("http://") || source.startsWith("https://"))) {
@@ -138,25 +161,24 @@ export async function downloadMediaFile(
             mode: "cors",
             cache: "no-store",
         });
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
+        if (response.ok) {
+            const blob = await response.blob();
+            const finalName = resolveDownloadFileName(source, fileName, blob.type);
+            saveAs(blob, finalName);
+            return;
         }
-        const blob = await response.blob();
-        const finalName = resolveDownloadFileName(source, fileName, blob.type);
-        saveAs(blob, finalName);
-        return;
     } catch (fetchError) {
-        console.warn("[downloadMediaFile] Direct fetch failed, trying fallbacks:", fetchError);
+        console.warn("[downloadMediaFile] Direct fetch failed, trying canvas fallback:", fetchError);
     }
 
-    // 2. For images: fallback to Image element + Canvas export
+    // 3. For images: fallback to Image element + Canvas export
     const isLikelyImage = typeof source === "string" && (
         /\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(source) ||
         source.includes("/image/")
     );
     if (isLikelyImage && typeof source === "string") {
         try {
-            const blob = await imageToBlob(source);
+            const blob = await imageToBlob(proxyUrl);
             const finalName = resolveDownloadFileName(source, fileName, blob.type);
             saveAs(blob, finalName);
             return;
@@ -165,7 +187,7 @@ export async function downloadMediaFile(
         }
     }
 
-    // 3. Fallback to direct fetch of original URL
+    // 4. Fallback: try direct fetch of original source
     try {
         const response = await fetch(source, { mode: "cors" });
         if (response.ok) {
@@ -178,9 +200,10 @@ export async function downloadMediaFile(
         // Ignore
     }
 
-    // 4. Final fallback: anchor click without target="_blank"
+    // 5. Final fallback: anchor click on proxyUrl (same-origin so download attribute works)
+    const fallbackTarget = proxyUrl !== source ? proxyUrl : source;
     const anchor = document.createElement("a");
-    anchor.href = source;
+    anchor.href = fallbackTarget;
     anchor.download = resolveDownloadFileName(source, fileName);
     document.body.appendChild(anchor);
     anchor.click();

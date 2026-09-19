@@ -28,6 +28,11 @@ export default defineConfig({
                 changeOrigin: true,
                 xfwd: true,
             },
+            "/media-proxy": {
+                target: "https://img.xcstudio.pw",
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/media-proxy/, ""),
+            },
         },
     },
     resolve: {

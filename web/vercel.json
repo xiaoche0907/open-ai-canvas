@@ -3,7 +3,23 @@
   "installCommand": "bun install",
   "buildCommand": "VITE_CANVAS_BACKEND_URL=https://api.xcstudio.pw/api bun run build",
   "outputDirectory": "dist",
+  "headers": [
+    {
+      "source": "/media-proxy/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, HEAD, OPTIONS" }
+      ]
+    }
+  ],
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/media-proxy/:path*",
+      "destination": "https://img.xcstudio.pw/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }

@@ -31,6 +31,7 @@ docs/content/docs/overview/*
 !docs/content/docs/overview/creative-agent-design.mdx
 .env*
 !.env.example
+!web/.env.production
 data/
 .local/
 /.local/docker-compose.postgres.yml

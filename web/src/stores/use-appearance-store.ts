@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 import type { PublicAppearance } from "@/services/api/appearance";
 import { applySkinTheme, DEFAULT_CLASSIC_SKIN, normalizeSkinDefinition } from "@/lib/skin-themes";
+import { resolveBackendApiUrl } from "@/stores/use-config-store";
 
 export const DEFAULT_PUBLIC_APPEARANCE: PublicAppearance = {
     schemaVersion: 8,
@@ -169,6 +170,7 @@ function normalizeBrandSlug(value: unknown) {
 function safeAppearanceURL(value: unknown, fallback: string) {
     const candidate = String(value || "").trim();
     if (!candidate) return fallback;
+    if (candidate.startsWith("/api/")) return resolveBackendApiUrl(candidate);
     if (candidate.startsWith("/") && !candidate.startsWith("//")) return candidate;
     try {
         const parsed = new URL(candidate);

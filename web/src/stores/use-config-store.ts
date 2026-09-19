@@ -986,7 +986,9 @@ export function resolveBackendApiUrl(value: string) {
     const backendBaseUrl = String(import.meta.env.VITE_CANVAS_BACKEND_URL || "/api")
         .trim()
         .replace(/\/+$/, "");
-    return backendBaseUrl === "/api" ? url : `${backendBaseUrl}${url.slice("/api".length)}`;
+    if (backendBaseUrl === "/api") return url;
+    const base = backendBaseUrl.endsWith("/api") ? backendBaseUrl : `${backendBaseUrl}/api`;
+    return `${base}${url.slice("/api".length)}`;
 }
 
 export function isSystemProxyBaseUrl(baseUrl: string) {

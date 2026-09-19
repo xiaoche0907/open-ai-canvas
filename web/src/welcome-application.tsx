@@ -1,11 +1,15 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { getWelcomeAvailability } from "@/services/api/welcome";
+import { bootstrapAppearance } from "@/services/appearance-bootstrap";
 import WelcomePage from "@/pages/welcome";
 
 async function renderWelcome() {
     try {
-        const { welcomeEnabled } = await getWelcomeAvailability();
+        const [{ welcomeEnabled }] = await Promise.all([
+            getWelcomeAvailability(),
+            bootstrapAppearance(),
+        ]);
         if (welcomeEnabled !== true) {
             window.location.replace("/");
             return;

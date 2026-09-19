@@ -1,7 +1,7 @@
 import { getPublicAppearance, type PublicAppearance } from "@/services/api/appearance";
 import { commitPublicAppearance, DEFAULT_PUBLIC_APPEARANCE } from "@/stores/use-appearance-store";
 
-const APPEARANCE_BOOTSTRAP_TIMEOUT_MS = 4_000;
+const APPEARANCE_BOOTSTRAP_TIMEOUT_MS = 8_000;
 
 export async function resolvePublicAppearance(fetchAppearance: (signal: AbortSignal) => Promise<PublicAppearance> = getPublicAppearance) {
     const controller = new AbortController();

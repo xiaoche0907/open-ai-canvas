@@ -13,6 +13,7 @@ import { WelcomeSetting } from "@/pages/admin/settings/components/welcome-settin
 import { deleteAdminResources } from "@/services/api/admin-storage";
 import { getAdminAppearance, resetAdminAppearance, updateAdminAppearance, uploadAppearanceAsset, type AdminAppearance, type AppearanceAssetSlot } from "@/services/api/appearance";
 import { commitPublicAppearance, DEFAULT_PUBLIC_APPEARANCE } from "@/stores/use-appearance-store";
+import { resolveBackendApiUrl } from "@/stores/use-config-store";
 
 type DraftFiles = Record<AppearanceAssetSlot, File | null>;
 type ResetState = Record<AppearanceAssetSlot, boolean>;
@@ -815,13 +816,13 @@ function useAppearancePreviews(setting: AdminAppearance | null, files: DraftFile
     return useMemo(() => {
         if (!setting) return { logoLight: DEFAULT_PUBLIC_APPEARANCE.logoUrl, logoDark: DEFAULT_PUBLIC_APPEARANCE.darkLogoUrl, video: DEFAULT_PUBLIC_APPEARANCE.authVideoUrl, poster: DEFAULT_PUBLIC_APPEARANCE.authVideoPosterUrl };
         const customVideo = Boolean(files.video || (!resets.video && setting.authVideoResourceId));
-        const lightLogo = logoObjectURL || (!resets.logo && setting.logoResourceId ? setting.public.logoUrl : "");
-        const darkLogo = darkLogoObjectURL || (!resets["logo-dark"] && setting.darkLogoResourceId ? setting.public.darkLogoUrl : "");
+        const lightLogo = logoObjectURL || (!resets.logo && setting.logoResourceId ? resolveBackendApiUrl(setting.public.logoUrl) : "");
+        const darkLogo = darkLogoObjectURL || (!resets["logo-dark"] && setting.darkLogoResourceId ? resolveBackendApiUrl(setting.public.darkLogoUrl) : "");
         return {
             logoLight: lightLogo || darkLogo || DEFAULT_PUBLIC_APPEARANCE.logoUrl,
             logoDark: darkLogo || lightLogo || DEFAULT_PUBLIC_APPEARANCE.darkLogoUrl,
-            video: videoObjectURL || (resets.video ? DEFAULT_PUBLIC_APPEARANCE.authVideoUrl : setting.public.authVideoUrl),
-            poster: posterObjectURL || (resets.poster ? (customVideo ? "" : DEFAULT_PUBLIC_APPEARANCE.authVideoPosterUrl) : setting.public.authVideoPosterUrl),
+            video: videoObjectURL || (resets.video ? DEFAULT_PUBLIC_APPEARANCE.authVideoUrl : resolveBackendApiUrl(setting.public.authVideoUrl)),
+            poster: posterObjectURL || (resets.poster ? (customVideo ? "" : DEFAULT_PUBLIC_APPEARANCE.authVideoPosterUrl) : resolveBackendApiUrl(setting.public.authVideoPosterUrl)),
         };
     }, [darkLogoObjectURL, files.video, logoObjectURL, posterObjectURL, resets, setting, videoObjectURL]);
 }

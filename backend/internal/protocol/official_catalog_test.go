@@ -168,6 +168,10 @@ func TestOfficialAgentProfilesMapToolRequestsAndResponses(t *testing.T) {
 			response: `{"choices":[{"message":{"content":"chat answer","tool_calls":[{"id":"call-chat","function":{"name":"canvas_get_state","arguments":"{\"scope\":\"all\"}"}}]}}]}`,
 		},
 		{
+			name: "plato-chat", packageName: "plato-chat.yingce-plugin", providerID: "plato-chat", marker: "chat", wantPath: "/v1/chat/completions", wantID: "call-plato",
+			response: `{"choices":[{"message":{"content":"plato answer","tool_calls":[{"id":"call-plato","function":{"name":"canvas_get_state","arguments":"{\"scope\":\"all\"}"}}]}}]}`,
+		},
+		{
 			name: "openai-responses", packageName: "openai-responses.yingce-plugin", providerID: "openai-response", marker: "responses", wantPath: "/responses", wantID: "call-responses",
 			response: `{"output_text":"responses answer","output":[{"type":"message"},{"type":"function_call","call_id":"call-responses","name":"canvas_get_state","arguments":"{\"scope\":\"all\"}"}]}`,
 		},

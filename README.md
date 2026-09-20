@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="web/public/logo.svg" width="88" alt="影策 logo">
+  <img src="assets/logo-readme.png" width="88" alt="境彻 logo">
 </p>
 
 <h1 align="center">境彻</h1>

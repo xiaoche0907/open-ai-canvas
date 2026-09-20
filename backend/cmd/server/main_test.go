@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -17,6 +18,29 @@ func TestAllowedOriginWildcard(t *testing.T) {
 	}
 	if allowedOrigin(context, "ftp://example.com") {
 		t.Fatal("wildcard CORS should reject non-HTTP origins")
+	}
+}
+
+func TestCORSAllowsAgentEventCursorHeader(t *testing.T) {
+	t.Setenv("CANVAS_CORS_ORIGINS", "https://app.example.com")
+	middleware, err := cors()
+	if err != nil {
+		t.Fatal(err)
+	}
+	recorder := httptest.NewRecorder()
+	context, _ := gin.CreateTestContext(recorder)
+	context.Request = httptest.NewRequest("OPTIONS", "http://backend/api/agent/runs/run-1/events?after=0", nil)
+	context.Request.Header.Set("Origin", "https://app.example.com")
+	context.Request.Header.Set("Access-Control-Request-Method", "GET")
+	context.Request.Header.Set("Access-Control-Request-Headers", "last-event-id")
+
+	middleware(context)
+
+	if recorder.Code != 204 {
+		t.Fatalf("preflight status = %d", recorder.Code)
+	}
+	if !strings.Contains(strings.ToLower(recorder.Header().Get("Access-Control-Allow-Headers")), "last-event-id") {
+		t.Fatalf("Last-Event-ID missing from Access-Control-Allow-Headers: %q", recorder.Header().Get("Access-Control-Allow-Headers"))
 	}
 }
 

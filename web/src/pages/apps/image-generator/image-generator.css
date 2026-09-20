@@ -1,0 +1,1212 @@
+/* =========================================================================
+   AI 应用 — 图像生成专属工作区样式表
+   遵循项目 Token 系统，严禁使用外部硬编码调色与荧光色。
+   ========================================================================= */
+
+.image-gen-root {
+    width: 100%;
+    height: 100%;
+    background-color: var(--background);
+    color: var(--foreground);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.image-gen-root.is-discovery {
+    flex-direction: row;
+    overflow: hidden;
+}
+
+.image-gen-discovery-main {
+    min-width: 0;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.image-gen-discovery-main::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+.image-gen-root.is-workspace {
+    overflow: hidden;
+}
+
+/* -------------------------------------------------------------------------
+   模式 1：灵感发现与初始创作态 (Discovery Mode)
+   ------------------------------------------------------------------------- */
+.image-gen-discovery-container {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 32px 24px 100px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.image-gen-hero-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.image-gen-hero-title {
+    font-size: clamp(24px, 4vw, 36px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 10px 0;
+    color: var(--foreground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.image-gen-hero-subtitle {
+    font-size: 15px;
+    color: var(--muted-foreground);
+    max-width: 620px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* -------------------------------------------------------------------------
+   通用悬浮生成主控坞 (Floating Generation Dock)
+   ------------------------------------------------------------------------- */
+.image-gen-dock-wrapper {
+    width: 100%;
+    max-width: 860px;
+    position: relative;
+    z-index: var(--z-panel-floating, 80);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.image-gen-dock-wrapper.is-workspace {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    max-width: 820px;
+}
+
+.image-gen-dock-card {
+    background: color-mix(in srgb, var(--card) 92%, transparent);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--border);
+    border-radius: var(--r-2xl, 16px);
+    box-shadow: var(--elevation-overlay, 0 20px 48px rgba(0, 0, 0, 0.16));
+    padding: 16px 20px 14px;
+    position: relative;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.image-gen-dock-card:focus-within {
+    border-color: color-mix(in srgb, var(--ring) 60%, var(--border));
+    box-shadow: var(--elevation-overlay), 0 0 0 1px color-mix(in srgb, var(--ring) 30%, transparent);
+}
+
+/* 顶部生成类型模式切换 */
+.image-gen-dock-modes {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.image-gen-mode-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: var(--r-md, 8px);
+    font-size: 12px;
+    font-weight: 500;
+    border: none;
+    background: transparent;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.image-gen-mode-btn:hover {
+    color: var(--foreground);
+    background: var(--control-selected-bg, rgba(125, 125, 125, 0.08));
+}
+
+.image-gen-mode-btn.is-active {
+    color: var(--button-primary-fg, #ffffff);
+    background: var(--button-primary-bg, var(--foreground));
+    font-weight: 600;
+}
+
+/* 核心输入区域（左侧参考图，右侧提示词） */
+.image-gen-dock-body {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+/* 参考图堆叠：默认收拢，悬停后依次展开 */
+.image-gen-ref-picker {
+    width: 68px;
+    height: 84px;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    z-index: 4;
+}
+
+.image-gen-ref-card {
+    --image-gen-ref-index: 0;
+    position: absolute;
+    inset: 0;
+    width: 68px;
+    height: 84px;
+    border-radius: var(--r-lg, 12px);
+    border: 1px solid var(--border);
+    background: var(--card);
+    overflow: hidden;
+    left: calc(var(--image-gen-ref-index) * 4px);
+    top: calc(var(--image-gen-ref-index) * 1px);
+    z-index: calc(20 - var(--image-gen-ref-index));
+    box-shadow: var(--elevation-card);
+    transition: left 0.24s cubic-bezier(0.16, 1, 0.3, 1), top 0.24s cubic-bezier(0.16, 1, 0.3, 1), transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+
+.image-gen-ref-card.is-even {
+    transform: rotate(-2deg);
+}
+
+.image-gen-ref-card.is-odd {
+    transform: rotate(2deg);
+}
+
+.image-gen-ref-card.is-add {
+    border-style: dashed;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    font: inherit;
+    padding: 0;
+}
+
+.image-gen-ref-card.is-add:disabled {
+    cursor: wait;
+}
+
+.image-gen-ref-picker:hover .image-gen-ref-card,
+.image-gen-ref-picker:focus-within .image-gen-ref-card {
+    left: calc(var(--image-gen-ref-index) * 48px);
+    top: 0;
+    transform: rotate(0);
+}
+
+.image-gen-ref-picker:hover .image-gen-ref-card:hover,
+.image-gen-ref-picker:focus-within .image-gen-ref-card:focus-within {
+    border-color: var(--ring);
+    z-index: 30;
+}
+
+.image-gen-ref-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-gen-ref-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.image-gen-ref-image .ant-image-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-gen-ref-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.75);
+    color: #ffffff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.image-gen-ref-picker:hover .image-gen-ref-remove,
+.image-gen-ref-picker:focus-within .image-gen-ref-remove {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.image-gen-ref-remove:hover {
+    transform: scale(1.15);
+    background: #e11d48;
+}
+
+.image-gen-ref-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--muted-foreground);
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.image-gen-ref-count {
+    position: absolute;
+    right: -8px;
+    bottom: -7px;
+    z-index: 40;
+    min-width: 30px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: var(--r-full, 9999px);
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--muted-foreground);
+    box-shadow: var(--elevation-card);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .image-gen-ref-card {
+        transition: none;
+    }
+}
+
+/* 提示词输入框 */
+.image-gen-prompt-input-wrap {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.image-gen-prompt-textarea {
+    width: 100%;
+    min-height: 64px;
+    max-height: 150px;
+    resize: none;
+    border: none;
+    background: transparent;
+    color: var(--foreground);
+    font-size: 14px;
+    line-height: 1.6;
+    outline: none;
+    padding: 0;
+    font-family: inherit;
+}
+
+.image-gen-prompt-textarea::placeholder {
+    color: var(--muted-foreground);
+    opacity: 0.65;
+}
+
+/* 底部工具行：模型选择、参数药丸、消耗展示与提交按钮 */
+.image-gen-dock-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+    gap: 12px;
+}
+
+.image-gen-dock-controls-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* 与首页保持一致的胶囊 pill 外观 */
+.image-gen-dock-card .creation-chat-control,
+.image-gen-dock-card .creation-model-picker.canvas-composer-model-picker {
+    height: 32px !important;
+    min-height: 32px !important;
+    border-radius: 999px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+}
+
+.image-gen-dock-card .creation-voice-trigger.ant-btn {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    border-radius: 50% !important;
+}
+
+/* 算力与提交区 */
+.image-gen-dock-controls-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.image-gen-credit-badge {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted-foreground);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.image-gen-submit-btn {
+    min-width: 96px;
+    height: 36px;
+    border-radius: var(--r-full, 9999px);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+/* -------------------------------------------------------------------------
+   灵感发现区块（复用首页精选灵感风格）
+   ------------------------------------------------------------------------- */
+.image-gen-inspiration-section {
+    width: 100%;
+    margin-top: 48px;
+}
+
+.image-gen-inspiration-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.image-gen-inspiration-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--foreground);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.image-gen-inspiration-tabs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.image-gen-tab-btn {
+    padding: 6px 14px;
+    border-radius: var(--r-full, 9999px);
+    font-size: 13px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.image-gen-tab-btn:hover {
+    color: var(--foreground);
+}
+
+.image-gen-tab-btn.is-active {
+    background: var(--control-selected-bg, rgba(125, 125, 125, 0.1));
+    border-color: var(--border);
+    color: var(--foreground);
+    font-weight: 600;
+}
+
+/* -------------------------------------------------------------------------
+   模式 2：画布结果工作台 (Workspace Mode - 图 2 结构)
+   ------------------------------------------------------------------------- */
+.image-gen-workspace-root {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: row;
+    background-color: var(--background);
+    overflow: hidden;
+}
+
+.image-gen-workspace-main {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.image-gen-workspace-main > .image-gen-dock-wrapper.is-workspace {
+    position: absolute;
+}
+
+.image-gen-project-sidebar {
+    position: relative;
+    z-index: var(--z-toolbar, 30);
+    display: flex;
+    width: 260px;
+    flex: 0 0 260px;
+    flex-direction: column;
+    gap: 8px;
+    overflow: hidden;
+    border-right: 1px solid var(--border);
+    background: color-mix(in srgb, var(--card) 88%, var(--background));
+    padding: 18px 10px;
+}
+
+.image-gen-sidebar-heading {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.image-gen-sidebar-heading .image-gen-sidebar-nav {
+    min-width: 0;
+    flex: 1;
+}
+
+.image-gen-sidebar-collapse {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    place-items: center;
+    border: 0;
+    border-radius: var(--r-md, 8px);
+    background: transparent;
+    color: var(--muted-foreground);
+    cursor: pointer;
+}
+
+.image-gen-sidebar-collapse:hover {
+    background: var(--control-selected-bg, color-mix(in srgb, var(--foreground) 8%, transparent));
+    color: var(--foreground);
+}
+
+.image-gen-history-launcher {
+    position: absolute;
+    bottom: 22px;
+    left: 18px;
+    z-index: var(--z-panel-floating, 80);
+    display: inline-flex;
+    min-height: 48px;
+    align-items: center;
+    gap: 9px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-full, 9999px);
+    background: color-mix(in srgb, var(--card) 94%, transparent);
+    padding: 7px 9px 7px 14px;
+    color: var(--foreground);
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: var(--elevation-card, 0 8px 24px rgba(0, 0, 0, 0.14));
+    backdrop-filter: blur(16px);
+    cursor: pointer;
+}
+
+.image-gen-history-launcher:hover {
+    background: var(--card);
+    transform: translateY(-1px);
+}
+
+.image-gen-history-launcher em {
+    display: grid;
+    min-width: 30px;
+    height: 30px;
+    place-items: center;
+    border-radius: var(--r-full, 9999px);
+    background: color-mix(in srgb, var(--foreground) 6%, transparent);
+    color: var(--muted-foreground);
+    font-size: 12px;
+    font-style: normal;
+}
+
+.image-gen-sidebar-nav,
+.image-gen-new-project-btn {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    border: 1px solid transparent;
+    border-radius: var(--r-md, 8px);
+    background: transparent;
+    padding: 0 12px;
+    color: var(--foreground);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+
+.image-gen-sidebar-nav:hover,
+.image-gen-sidebar-nav.is-active {
+    background: var(--control-selected-bg, color-mix(in srgb, var(--foreground) 8%, transparent));
+}
+
+.image-gen-sidebar-nav.is-history > span {
+    flex: 1;
+}
+
+.image-gen-sidebar-history {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.image-gen-new-project-btn {
+    border-color: color-mix(in srgb, var(--workspace-accent, var(--ring)) 55%, var(--border));
+    color: var(--workspace-accent, var(--foreground));
+}
+
+.image-gen-new-project-btn:hover {
+    background: color-mix(in srgb, var(--workspace-accent, var(--ring)) 8%, transparent);
+}
+
+.image-gen-project-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-md, 8px);
+    background: color-mix(in srgb, var(--foreground) 5%, transparent);
+    padding: 0 12px;
+    color: var(--muted-foreground);
+}
+
+.image-gen-project-search input,
+.image-gen-project-rename {
+    min-width: 0;
+    flex: 1;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--foreground);
+    font-size: 13px;
+}
+
+.image-gen-project-list {
+    min-height: 0;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.image-gen-project-group + .image-gen-project-group {
+    margin-top: 16px;
+}
+
+.image-gen-project-group-label {
+    padding: 7px 10px;
+    color: var(--muted-foreground);
+    font-size: 12px;
+}
+
+.image-gen-project-row {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    min-height: 58px;
+    border-radius: var(--r-md, 8px);
+    padding: 7px 8px;
+    color: var(--muted-foreground);
+}
+
+.image-gen-project-row:hover,
+.image-gen-project-row.is-active {
+    background: var(--control-selected-bg, color-mix(in srgb, var(--foreground) 8%, transparent));
+    color: var(--foreground);
+}
+
+.image-gen-project-row.is-active::before {
+    position: absolute;
+    top: 10px;
+    bottom: 10px;
+    left: -10px;
+    width: 3px;
+    border-radius: 0 var(--r-full) var(--r-full) 0;
+    background: var(--workspace-accent, var(--ring));
+    content: "";
+}
+
+.image-gen-project-select {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.image-gen-project-select:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+}
+
+.image-gen-project-thumb {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    place-items: center;
+    overflow: hidden;
+    border-radius: var(--r-sm, 6px);
+    background: color-mix(in srgb, var(--foreground) 8%, transparent);
+    color: var(--muted-foreground);
+}
+
+.image-gen-project-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-gen-project-name {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 13px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.image-gen-project-actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 2px;
+    margin-left: 4px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.image-gen-project-row:hover .image-gen-project-actions,
+.image-gen-project-row:focus-within .image-gen-project-actions,
+.image-gen-project-actions:has(.is-pinned) {
+    opacity: 1;
+}
+
+.image-gen-project-actions button {
+    display: grid;
+    width: 24px;
+    height: 24px;
+    place-items: center;
+    border: 0;
+    border-radius: var(--r-sm, 6px);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.image-gen-project-actions button:hover {
+    background: color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+
+.image-gen-project-actions button.is-pinned {
+    color: var(--workspace-accent, var(--ring));
+}
+
+.image-gen-project-empty {
+    padding: 28px 10px;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    text-align: center;
+}
+
+/* 顶部导航控制条 */
+.image-gen-topbar {
+    height: 56px;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--card) 85%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: var(--z-toolbar, 30);
+}
+
+.image-gen-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.image-gen-topbar-divider {
+    width: 1px;
+    height: 20px;
+    margin-inline: 2px;
+    background: var(--border);
+}
+
+.image-gen-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: var(--r-md, 8px);
+    transition: all 0.15s ease;
+}
+
+.image-gen-back-btn:hover {
+    color: var(--foreground);
+    background: var(--control-selected-bg, rgba(125, 125, 125, 0.08));
+}
+
+.image-gen-task-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--foreground);
+    min-height: 34px;
+    padding: 0 8px;
+    border-radius: var(--r-md, 8px);
+}
+
+.image-gen-pill-btn {
+    display: inline-flex;
+    min-height: 34px;
+    align-items: center;
+    gap: 6px;
+    border: 0;
+    border-radius: var(--r-md, 8px);
+    background: transparent;
+    padding: 0 9px;
+    color: var(--muted-foreground);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.image-gen-pill-btn:hover {
+    background: var(--control-selected-bg, color-mix(in srgb, var(--foreground) 8%, transparent));
+    color: var(--foreground);
+}
+
+.image-gen-workspace-modes {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg, 10px);
+    background: color-mix(in srgb, var(--card) 88%, transparent);
+    padding: 3px;
+}
+
+.image-gen-workspace-modes button {
+    display: inline-flex;
+    min-height: 28px;
+    align-items: center;
+    gap: 5px;
+    border: 0;
+    border-radius: var(--r-md, 8px);
+    background: transparent;
+    padding: 0 9px;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.image-gen-workspace-modes button:hover:not(:disabled) {
+    background: var(--control-selected-bg, color-mix(in srgb, var(--foreground) 8%, transparent));
+    color: var(--foreground);
+}
+
+.image-gen-workspace-modes button.is-active {
+    background: var(--foreground);
+    color: var(--background);
+}
+
+.image-gen-workspace-modes button:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
+.image-gen-title-input {
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--foreground);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: var(--r-sm, 6px);
+    outline: none;
+    width: 220px;
+    transition: all 0.15s ease;
+}
+
+.image-gen-title-input:hover,
+.image-gen-title-input:focus {
+    border-color: var(--border);
+    background: var(--card);
+}
+
+.image-gen-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.image-gen-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 100px;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-md, 8px);
+    background: var(--control-selected-bg, rgba(125, 125, 125, 0.08));
+    color: var(--foreground);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.image-gen-filter-btn span {
+    flex: 1;
+    text-align: left;
+}
+
+/* 缩放控制器 */
+.image-gen-zoom-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--control-selected-bg, rgba(125, 125, 125, 0.08));
+    height: 36px;
+    padding: 0 10px;
+    border-radius: var(--r-md, 8px);
+    border: 1px solid var(--border);
+}
+
+.image-gen-zoom-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    min-width: 40px;
+    text-align: center;
+}
+
+/* 工作台主展示区 */
+.image-gen-canvas-stage {
+    flex: 1;
+    position: relative;
+    overflow: auto;
+    padding: 24px 24px 180px;
+    background-image: radial-gradient(color-mix(in srgb, var(--foreground) 10%, transparent) 1px, transparent 1px);
+    background-size: 24px 24px;
+}
+
+.image-gen-results-grid {
+    --image-gen-card-width: 280px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, var(--image-gen-card-width));
+    align-items: start;
+    justify-content: start;
+    gap: 16px;
+    width: 100%;
+}
+
+.image-gen-empty-state {
+    position: absolute;
+    inset: 0 0 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--muted-foreground);
+}
+
+/* 生成结果卡片 */
+.image-gen-result-card {
+    position: relative;
+    width: var(--image-gen-card-width);
+    border-radius: var(--r-xl, 14px);
+    background: var(--library-surface, var(--card));
+    border: 0;
+    box-shadow: none;
+    overflow: hidden;
+    transition: width 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+}
+
+.image-gen-result-media {
+    position: relative;
+    width: 100%;
+    min-height: 120px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--foreground) 5%, transparent);
+}
+
+.image-gen-result-open {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: zoom-in;
+}
+
+.image-gen-result-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.image-gen-result-badges {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    display: flex;
+    gap: 5px;
+    pointer-events: none;
+}
+
+.image-gen-result-badges span {
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: var(--r-xs, 4px);
+    background: rgba(10, 10, 10, 0.58);
+    padding: 2px 6px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.image-gen-result-info {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    gap: 5px;
+    border: 0;
+    background: transparent;
+    padding: 9px 10px 11px;
+    color: var(--foreground);
+    text-align: left;
+    cursor: zoom-in;
+}
+
+.image-gen-result-info-title {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.image-gen-result-info-title strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.image-gen-result-info-title time,
+.image-gen-result-summary,
+.image-gen-result-source {
+    color: var(--muted-foreground);
+    font-size: 10px;
+}
+
+.image-gen-result-info-title time {
+    flex: 0 0 auto;
+}
+
+.image-gen-result-summary,
+.image-gen-result-source {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 卡片悬浮操作条 */
+.image-gen-card-actions-bar {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: color-mix(in srgb, var(--card) 90%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: var(--r-full, 9999px);
+    padding: 5px 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--elevation-card);
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+}
+
+.image-gen-result-card:hover .image-gen-card-actions-bar {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(-2px);
+}
+
+.image-gen-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: var(--r-full, 9999px);
+    background: transparent;
+    border: none;
+    color: var(--foreground);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.image-gen-asset-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    color: var(--success, #52c41a);
+    border-left: 1px solid var(--border);
+}
+
+.image-gen-action-btn:hover {
+    background: var(--control-selected-bg, rgba(125, 125, 125, 0.12));
+}
+
+/* 生成中动画指示器 */
+.image-gen-loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: var(--image-gen-card-width);
+    min-height: 180px;
+    border-radius: var(--r-xl, 14px);
+    background: var(--card);
+    border: 1px dashed var(--border);
+    gap: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: width 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.image-gen-loading-title {
+    color: var(--foreground);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.image-gen-loading-copy {
+    max-width: 100%;
+    color: var(--muted-foreground);
+    font-size: 12px;
+}
+
+.image-gen-pulsing-orbit {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 900px) {
+    .image-gen-project-sidebar {
+        width: 210px;
+        flex-basis: 210px;
+    }
+
+    .image-gen-topbar {
+        padding: 0 12px;
+    }
+
+    .image-gen-pill-btn span,
+    .image-gen-zoom-label {
+        display: none;
+    }
+
+    .image-gen-topbar-left,
+    .image-gen-topbar-right {
+        gap: 8px;
+    }
+
+    .image-gen-canvas-stage {
+        padding-inline: 16px;
+    }
+}
+
+.image-gen-pulse-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid color-mix(in srgb, var(--foreground) 32%, transparent);
+    animation: orbitPulse 2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+@keyframes orbitPulse {
+    0% {
+        transform: scale(0.6);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.6);
+        opacity: 0;
+    }
+}

@@ -698,6 +698,9 @@ function ModePicker({ mode, onModeChange }: { mode: CreationMode; onModeChange: 
 
 function GenerationSettingsMenu(props: ComposerProps) {
     const [open, setOpen] = useState(false);
+    const [computedPlacement, setComputedPlacement] = useState<"bottom" | "top">("bottom");
+    const [availableMaxHeight, setAvailableMaxHeight] = useState<number | undefined>(undefined);
+    const triggerRef = useRef<HTMLButtonElement>(null);
     const activeQualityOptions = props.imageProfile.quality.values.map((value) => qualityOptions.find((item) => item.value === value) || { value, label: value.toUpperCase(), description: "模型支持的质量/分辨率" });
     const qualityLabel = activeQualityOptions.find((item) => item.value === props.quality)?.label || qualityOptions.find((item) => item.value === props.quality)?.label || props.quality || "自动";
     // 尺寸/比例/分辨率选项取同显示名分组内全部模型的并集，路由模型只决定发送参数。
@@ -722,7 +725,13 @@ function GenerationSettingsMenu(props: ComposerProps) {
     ].join(" · ");
     const videoRatioSupported = props.mode === "video" && ratios.length > 0;
     const summary = props.mode === "video" ? [...(videoRatioSupported ? [props.ratio] : []), ...(videoResolutionSupported ? [videoResolutionLabel(props.videoQuality)] : [])].join(" · ") : imageSummary;
-    const panel = <div className="creation-parameter-menu">
+    const panel = <div
+        className="creation-parameter-menu"
+        style={{
+            maxHeight: availableMaxHeight ? `${availableMaxHeight}px` : "min(520px, calc(100vh - 64px))",
+            overflowY: "auto",
+        }}
+    >
         {props.mode === "image" ? <ImageSizePicker profile={mergedProfile} size={props.ratio} quality={props.quality} onChange={(size, quality) => { props.setRatio(size); if (quality) props.setQuality(quality); }} /> : videoRatioSupported ? <SettingSection title="画幅" value={props.ratio}><div className="creation-choice-grid is-ratio">{ratios.map((value) => <button key={value} type="button" aria-pressed={value === props.ratio} className={value === props.ratio ? "is-selected" : ""} onClick={() => props.setRatio(value)}><span className="creation-ratio-preview"><span style={ratioPreviewStyle(value)} /></span><span>{value}</span></button>)}</div></SettingSection> : null}
         {props.mode === "image" && referenceImageSizeValue ? <button type="button" className="creation-custom-trigger" onClick={selectReferenceImageSize}>使用参考图尺寸 · {referenceImageSizeLabel}</button> : null}
         {props.mode === "video" ? (videoResolutionSupported ? <SettingSection title="清晰度" value={videoResolutionLabel(props.videoQuality)}><div className="creation-choice-grid is-resolution">{resolutions.map((option) => <button key={option.value} type="button" aria-pressed={option.value === props.videoQuality} className={option.value === props.videoQuality ? "is-selected" : ""} onClick={() => props.setVideoQuality(option.value)}>{option.label}</button>)}</div></SettingSection> : null) : <>
@@ -731,8 +740,28 @@ function GenerationSettingsMenu(props: ComposerProps) {
             {props.imageProfile.maxOutputs > 1 ? <SettingSection title="生成数量" value={`${props.count} 张`}><div className="creation-parameter-content"><div className="creation-choice-grid is-count">{countOptions.filter((option) => Number(option) <= props.imageProfile.maxOutputs).map((option) => <button key={option} type="button" aria-pressed={option === props.count} className={option === props.count ? "is-selected" : ""} onClick={() => props.setCount(option)}>{option}</button>)}</div><label className="creation-custom-value"><span>自定义</span><input inputMode="numeric" pattern="[0-9]*" value={props.count} onChange={(event) => props.setCount(String(Math.max(1, Math.min(props.imageProfile.maxOutputs, Number(event.target.value) || 1))))} aria-label={`生成数量，范围 1 到 ${props.imageProfile.maxOutputs}`} /><em>张</em></label></div></SettingSection> : null}
         </>}
     </div>;
-    return <Popover open={open} onOpenChange={setOpen} trigger="click" placement="bottom" arrow={false} classNames={{ root: "creation-control-popover", container: "creation-control-popover-surface", content: "creation-control-popover-content" }} content={panel}>
-        <button type="button" className="creation-chat-control" aria-label={`生成设置：${summary}`}><SlidersHorizontal /><span>{summary}</span><ChevronDown className={open ? "is-open" : ""} /></button>
+
+    const handleOpenChange = (nextOpen: boolean) => {
+        if (nextOpen && triggerRef.current) {
+            const rect = triggerRef.current.getBoundingClientRect();
+            const spaceAbove = rect.top;
+            const spaceBelow = window.innerHeight - rect.bottom;
+            if (spaceAbove < 480) {
+                setComputedPlacement("bottom");
+                setAvailableMaxHeight(Math.max(240, Math.floor(spaceBelow - 16)));
+            } else if (spaceBelow < 380) {
+                setComputedPlacement("top");
+                setAvailableMaxHeight(Math.max(240, Math.floor(spaceAbove - 16)));
+            } else {
+                setComputedPlacement("bottom");
+                setAvailableMaxHeight(Math.max(240, Math.floor(spaceBelow - 16)));
+            }
+        }
+        setOpen(nextOpen);
+    };
+
+    return <Popover open={open} onOpenChange={handleOpenChange} trigger="click" placement={computedPlacement} autoAdjustOverflow={false} arrow={false} classNames={{ root: "creation-control-popover", container: "creation-control-popover-surface", content: "creation-control-popover-content" }} content={panel}>
+        <button ref={triggerRef} type="button" className="creation-chat-control" aria-label={`生成设置：${summary}`}><SlidersHorizontal /><span>{summary}</span><ChevronDown className={open ? "is-open" : ""} /></button>
     </Popover>;
 }
 
@@ -742,6 +771,8 @@ function SettingSection({ title, value, children }: { title: string; value?: str
 
 function DurationMenu({ profile, seconds, onChange }: { profile: VideoCapabilityConfig; seconds: string; onChange: (value: string) => void }) {
     const [open, setOpen] = useState(false);
+    const [computedPlacement, setComputedPlacement] = useState<"bottom" | "top">("bottom");
+    const triggerRef = useRef<HTMLButtonElement>(null);
     const value = Number(normalizeVideoValue(profile, { seconds }).seconds);
     const presets = profile.duration.selection === "enum" ? videoDurationOptions(profile) : [];
     const fallbackPreset = presets.length ? presets : [profile.duration.default];
@@ -753,8 +784,25 @@ function DurationMenu({ profile, seconds, onChange }: { profile: VideoCapability
         <div className="flex justify-between px-0.5 text-[var(--fs-tiny)] text-[var(--creation-muted)]"><span>{min}s</span><span>{max}s</span></div>
         <label className="creation-custom-value is-duration"><span>自定义时长</span><span className="creation-duration-custom-field"><input type="number" min={min} max={max} step={step} inputMode="numeric" value={seconds} onFocus={(event) => event.currentTarget.select()} onBlur={() => onChange(String(value))} onChange={(event) => onChange(event.target.value)} aria-label="自定义视频时长，单位秒" /><em>秒</em></span></label>
     </> : <div className="creation-duration-choices">{presets.map((item) => <button key={item} type="button" className={item === value ? "is-selected" : ""} onClick={() => onChange(String(item))}>{item}s</button>)}</div>;
-    return <Popover open={open} onOpenChange={setOpen} trigger="click" placement="bottom" arrow={false} classNames={{ root: "creation-control-popover", container: "creation-control-popover-surface", content: "creation-control-popover-content" }} content={<div className="creation-duration-menu"><div className="creation-duration-heading"><span>时长</span><strong>{value} 秒</strong></div>{durationControl}</div>}>
-        <button type="button" className="creation-chat-control is-duration" aria-label={`视频时长：${value}秒`}><Clock3 /><span>{value}s</span><ChevronDown className={open ? "is-open" : ""} /></button>
+
+    const handleOpenChange = (nextOpen: boolean) => {
+        if (nextOpen && triggerRef.current) {
+            const rect = triggerRef.current.getBoundingClientRect();
+            const spaceAbove = rect.top;
+            const spaceBelow = window.innerHeight - rect.bottom;
+            if (spaceAbove < 480) {
+                setComputedPlacement("bottom");
+            } else if (spaceBelow < 380) {
+                setComputedPlacement("top");
+            } else {
+                setComputedPlacement("bottom");
+            }
+        }
+        setOpen(nextOpen);
+    };
+
+    return <Popover open={open} onOpenChange={handleOpenChange} trigger="click" placement={computedPlacement} autoAdjustOverflow={false} arrow={false} classNames={{ root: "creation-control-popover", container: "creation-control-popover-surface", content: "creation-control-popover-content" }} content={<div className="creation-duration-menu"><div className="creation-duration-heading"><span>时长</span><strong>{value} 秒</strong></div>{durationControl}</div>}>
+        <button ref={triggerRef} type="button" className="creation-chat-control is-duration" aria-label={`视频时长：${value}秒`}><Clock3 /><span>{value}s</span><ChevronDown className={open ? "is-open" : ""} /></button>
     </Popover>;
 }
 

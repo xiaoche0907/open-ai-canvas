@@ -29,6 +29,8 @@ type ModelPickerProps = {
     variant?: "default" | "creation";
     requirements?: ModelRequirements;
     showConfiguredModelName?: boolean;
+    placement?: "bottomLeft" | "bottom" | "topLeft" | "top";
+    autoAdjustOverflow?: boolean;
 };
 
 export function ModelPicker({
@@ -46,6 +48,8 @@ export function ModelPicker({
     variant = "creation",
     requirements,
     showConfiguredModelName = false,
+    placement,
+    autoAdjustOverflow = false,
 }: ModelPickerProps) {
     const creditsEnabled = useUserStore((state) => state.features.creditsEnabled);
     const pickerId = useId();
@@ -53,6 +57,8 @@ export function ModelPicker({
     const rawTheme = useActiveTheme();
     const theme = (canvasThemes[rawTheme as keyof typeof canvasThemes] ?? canvasThemes.dark) as CanvasTheme;
     const [open, setOpen] = useState(false);
+    const [computedPlacement, setComputedPlacement] = useState<"bottomLeft" | "topLeft">("bottomLeft");
+    const [availableMaxHeight, setAvailableMaxHeight] = useState<number | undefined>(undefined);
     const [activeGroupKey, setActiveGroupKey] = useState<string | null>(null);
     const [previewedModel, setPreviewedModel] = useState("");
     const [triggerWidth, setTriggerWidth] = useState<number | null>(null);
@@ -123,6 +129,24 @@ export function ModelPicker({
         if (nextOpen) {
             setPreviewedModel(current || options[0] || "");
             setActiveGroupKey(null);
+            const trigger = triggerRef.current;
+            if (trigger) {
+                const rect = trigger.getBoundingClientRect();
+                const spaceAbove = rect.top;
+                const spaceBelow = window.innerHeight - rect.bottom;
+                // 如果上面空间不够（< 480px），坚决往下不要往上，避免顶部选项被顶出屏幕点击不到
+                if (spaceAbove < 480) {
+                    setComputedPlacement("bottomLeft");
+                    setAvailableMaxHeight(Math.max(220, Math.floor(spaceBelow - 16)));
+                } else if (spaceBelow < 380) {
+                    // 上方空间充足（>= 480px）且下方空间不足（< 380px）时才往上弹
+                    setComputedPlacement("topLeft");
+                    setAvailableMaxHeight(Math.max(220, Math.floor(spaceAbove - 16)));
+                } else {
+                    setComputedPlacement("bottomLeft");
+                    setAvailableMaxHeight(Math.max(220, Math.floor(spaceBelow - 16)));
+                }
+            }
         }
         setOpen(nextOpen);
     };
@@ -173,6 +197,7 @@ export function ModelPicker({
                     background: theme.node.panel,
                     color: theme.node.text,
                     "--canvas-model-picker-trigger-width": triggerWidth ? String(triggerWidth) + "px" : undefined,
+                    maxHeight: availableMaxHeight ? `${availableMaxHeight}px` : undefined,
                 } as CSSProperties
             }
             role="listbox"
@@ -272,7 +297,8 @@ export function ModelPicker({
                 open={open}
                 onOpenChange={setPickerOpen}
                 trigger="click"
-                placement="bottomLeft"
+                placement={placement || computedPlacement}
+                autoAdjustOverflow={autoAdjustOverflow}
                 arrow={false}
                 content={content}
                 classNames={{

@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { Button, Tag } from "antd";
 import { AppModal } from "@/components/ui/product/app-modal";
+import { ImageGeneratorWorkspace } from "./image-generator";
 import {
     Search,
     ChevronDown,
@@ -57,7 +58,7 @@ const ALL_TOOLS: ToolItem[] = [
         desc: "融合多张参考素材，快速构建完整商业画面。",
         tag: "电商商业图",
         categories: ["fashion", "architecture", "food", "lifestyle"],
-        promptHint: "商业静物摄影，高光反射细腻，专业布光，电商质感主图",
+        promptHint: "",
     },
     {
         id: "product-replace",
@@ -197,7 +198,7 @@ const SECTIONS: SectionConfig[] = [
     { id: "style-replica", title: "风格复刻" },
 ];
 
-export default function AiAppsPage() {
+function AiAppsCatalog({ onOpenApp }: { onOpenApp: (appId: string) => void }) {
     const navigate = useNavigate();
 
     const [selectedCategory, setSelectedCategory] = useState<CategoryKey>("all");
@@ -284,7 +285,13 @@ export default function AiAppsPage() {
                                     <div
                                         key={tool.id}
                                         className="ai-app-card group"
-                                        onClick={() => setActiveTool(tool)}
+                                        onClick={() => {
+                                            if (tool.id === "image-gen") {
+                                                onOpenApp("image-gen");
+                                            } else {
+                                                setActiveTool(tool);
+                                            }
+                                        }}
                                     >
                                         {/* 卡片顶部视觉 Banner */}
                                         <div className="ai-app-card-banner">
@@ -311,7 +318,11 @@ export default function AiAppsPage() {
                                                 aria-label="查看详情"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    setActiveTool(tool);
+                                                    if (tool.id === "image-gen") {
+                                                        onOpenApp("image-gen");
+                                                    } else {
+                                                        setActiveTool(tool);
+                                                    }
                                                 }}
                                             >
                                                 <Eye className="size-3.5" />
@@ -422,5 +433,30 @@ export default function AiAppsPage() {
                 )}
             </AppModal>
         </WorkspacePage>
+    );
+}
+
+export default function AiAppsPage() {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const currentApp = searchParams.get("app");
+
+    if (currentApp === "image-gen") {
+        return (
+            <ImageGeneratorWorkspace
+                onBack={() => {
+                    const next = new URLSearchParams(searchParams);
+                    next.delete("app");
+                    setSearchParams(next);
+                }}
+            />
+        );
+    }
+
+    return (
+        <AiAppsCatalog
+            onOpenApp={(appId) => {
+                setSearchParams({ app: appId });
+            }}
+        />
     );
 }

@@ -33,12 +33,13 @@ type CreditLedgerEntry struct {
 }
 
 type BillingOrder struct {
-	ID             string `json:"id" gorm:"primaryKey;size:36"`
-	UserID         string `json:"userId" gorm:"size:36;index;uniqueIndex:idx_billing_user_idempotency,priority:1"`
-	IdempotencyKey string `json:"idempotencyKey" gorm:"size:160;uniqueIndex:idx_billing_user_idempotency,priority:2"`
-	TaskID         string `json:"taskId,omitempty" gorm:"index;size:36"`
-	ChannelID      string `json:"channelId" gorm:"index;size:36"`
-	ChannelModelID string `json:"channelModelId" gorm:"index;size:36"`
+	BillingCostSnapshot `json:"-" gorm:"embedded"`
+	ID                  string `json:"id" gorm:"primaryKey;size:36"`
+	UserID              string `json:"userId" gorm:"size:36;index;uniqueIndex:idx_billing_user_idempotency,priority:1"`
+	IdempotencyKey      string `json:"idempotencyKey" gorm:"size:160;uniqueIndex:idx_billing_user_idempotency,priority:2"`
+	TaskID              string `json:"taskId,omitempty" gorm:"index;size:36"`
+	ChannelID           string `json:"channelId" gorm:"index;size:36"`
+	ChannelModelID      string `json:"channelModelId" gorm:"index;size:36"`
 	// PriceTierID/Version 记录任务实际命中的规格档；金额字段仍是不可变结算快照。
 	PriceTierID                string `json:"priceTierId,omitempty" gorm:"index;size:36"`
 	PriceTierVersion           int64  `json:"priceTierVersion"`
@@ -53,7 +54,9 @@ type BillingOrder struct {
 	Quantity                   int64  `json:"quantity"`
 	AmountMicrocredits         int64  `json:"amountMicrocredits"`
 	ReservedAmountMicrocredits int64  `json:"reservedAmountMicrocredits"`
-	// ChargeLimitMicrocredits 非零时限制最终用户扣费；Agent 的 Token 报价用它把预授权金额固化为本轮硬上限。
+	// ChargeLimitSet distinguishes an authorized zero price from an uncapped order.
+	// All Agent prices remain capped across route changes and settlement.
+	ChargeLimitSet               bool  `json:"chargeLimitSet,omitempty" gorm:"not null;default:false"`
 	ChargeLimitMicrocredits      int64 `json:"chargeLimitMicrocredits,omitempty"`
 	ActualAmountMicrocredits     int64 `json:"actualAmountMicrocredits"`
 	RefundedAmountMicrocredits   int64 `json:"refundedAmountMicrocredits"`

@@ -64,8 +64,8 @@ services:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
     environment:
-      TUNNEL_TRANSPORT_PROTOCOL: http2
-    command: tunnel --no-autoupdate --loglevel debug run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+      TUNNEL_TRANSPORT_PROTOCOL: quic
+    command: tunnel --no-autoupdate --loglevel info run --token ${CLOUDFLARE_TUNNEL_TOKEN}
     extra_hosts:
       - "localhost:host-gateway"
     depends_on:

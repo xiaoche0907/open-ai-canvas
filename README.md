@@ -2,7 +2,7 @@
   <img src="web/public/logo.svg" width="88" alt="影策 logo">
 </p>
 
-<h1 align="center">影策</h1>
+<h1 align="center">境彻</h1>
 
 <p align="center">让一个故事，从文字走向银幕</p>
 

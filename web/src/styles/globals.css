@@ -17728,6 +17728,32 @@ html:not(.dark) .creation-home .creation-user-message-copy-wrap { box-shadow: 0 
     color: var(--user-ink);
 }
 
+
+/* StablePopover: fixed-position portal that bypasses rc-trigger alignment.
+   Fixes Windows Chromium bug where antd Popover lands at left:-11730px. */
+.stable-popover-anchor {
+    display: contents;
+}
+
+body.app-user-overlays .stable-popover {
+    position: fixed;
+    z-index: 1200;
+    margin: 0;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+    pointer-events: auto;
+}
+
+body.app-user-overlays .stable-popover :is(.ant-popover-content, .ant-popover-container, .ant-popover-inner) {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
 .dark .app-user-workspace,
 .dark .app-user-overlays {
     --user-page-bg: #151517;

@@ -1,6 +1,5 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { Check, ChevronDown, ChevronLeft, Coins } from "lucide-react";
-import { Popover } from "antd";
 
 import { canvasThemes, type CanvasTheme } from "@/lib/canvas-theme";
 import { modelCapabilityConfigFor, videoDurationOptions } from "@/lib/model-capabilities";
@@ -12,6 +11,7 @@ import { modelDisplayName, modelIcon, modelOptionName, resolveModelChannel, sele
 import { useActiveTheme } from "@/stores/canvas/use-canvas-theme-store";
 import { useUserStore } from "@/stores/use-user-store";
 import { ModelLogo } from "@/components/model-logo";
+import { StablePopover } from "@/components/ui/stable-popover";
 import { quoteModel, type LogicalModelQuote } from "@/services/api/logical-models";
 
 type ModelPickerProps = {
@@ -293,16 +293,13 @@ export function ModelPicker({
 
     return (
         <div className={cn(fullWidth ? "w-full min-w-0" : "w-fit max-w-full")} onMouseDown={(event) => event.stopPropagation()} onPointerDown={(event) => event.stopPropagation()}>
-            <Popover
+            <StablePopover
                 open={open}
                 onOpenChange={setPickerOpen}
-                trigger="click"
-                placement={placement || computedPlacement}
-                autoAdjustOverflow={autoAdjustOverflow}
-                arrow={false}
+                placement="bottomLeft"
                 content={content}
+                rootClassName={cn("canvas-model-picker-popover", "creation-model-picker-popover", popoverClassName)}
                 classNames={{
-                    root: cn("canvas-model-picker-popover", "creation-model-picker-popover", popoverClassName),
                     container: cn("canvas-composer-popover-surface", "creation-model-picker-surface"),
                     content: "canvas-composer-popover-content",
                 }}
@@ -326,7 +323,7 @@ export function ModelPicker({
                     </span>
                     <ChevronDown className={cn("canvas-model-picker-chevron", open && "is-open")} aria-hidden="true" />
                 </button>
-            </Popover>
+            </StablePopover>
         </div>
     );
 }

@@ -17755,6 +17755,20 @@ body.app-user-overlays .stable-popover :is(.ant-popover-content, .ant-popover-co
     -webkit-backdrop-filter: none !important;
 }
 
+/* Global rc-trigger fix for Windows Chromium popup off-screen bug.
+   rc-align sets pointer-events:none during measurement, then resets top/left to 0.
+   In buggy Chromium builds the browser serializes old left/top into `inset` shorthand,
+   so the longhand top:0 reset fails and measurement reads the popup at its old off-screen
+   position (top:-12430px). While pointer-events:none is set (measurement phase only),
+   force top/left:0 so rc-align measures correctly. Once it finishes and sets pointer-events:auto
+   (or removes it), this rule no longer applies and the real position takes effect. */
+:where(.ant-popover, .ant-dropdown, .ant-dropdown-wrap, .ant-select-dropdown, .ant-tooltip, .ant-picker-dropdown, .ant-cascader-menus, .ant-mentions-dropdown)[style*="pointer-events: none"] {
+    top: 0 !important;
+    left: 0 !important;
+    right: auto !important;
+    bottom: auto !important;
+}
+
 .dark .app-user-workspace,
 .dark .app-user-overlays {
     --user-page-bg: #151517;

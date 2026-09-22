@@ -17754,6 +17754,19 @@ body.app-user-overlays .stable-popover :is(.ant-popover-content, .ant-popover-co
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
 }
+
+/* Global rc-trigger fix for Windows Chromium:
+   rc-align resets popup position via style.left='0' before measuring.
+   In some Chromium builds the browser serializes left/top/right/bottom into the
+   `inset` shorthand inline style, and the longhand style.left no longer overrides it,
+   so measurement reads the popup at its old (off-screen) position and rc-align writes
+   back -10x viewport coordinates (left:-11730px).
+   Force inset:auto so left/top longhands always control positioning. This covers
+   Popover, Dropdown, Select, Tooltip, DatePicker, Cascader, Mentions - every rc-trigger
+   popup - without per-component patches. */
+:where(.ant-popover, .ant-dropdown, .ant-dropdown-wrap, .ant-select-dropdown, .ant-tooltip, .ant-picker-dropdown, .ant-cascader-menus, .ant-mentions-dropdown) {
+    inset: auto !important;
+}
 .dark .app-user-workspace,
 .dark .app-user-overlays {
     --user-page-bg: #151517;

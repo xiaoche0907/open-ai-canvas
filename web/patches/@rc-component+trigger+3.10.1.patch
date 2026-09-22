@@ -1,0 +1,28 @@
+diff --git a/node_modules/@rc-component/trigger/es/hooks/useAlign.js b/node_modules/@rc-component/trigger/es/hooks/useAlign.js
+index a985efe..6427048 100644
+--- a/node_modules/@rc-component/trigger/es/hooks/useAlign.js
++++ b/node_modules/@rc-component/trigger/es/hooks/useAlign.js
+@@ -123,6 +123,11 @@ export default function useAlign(open, popupEle, target, placement, builtinPlace
+       placeholderElement.style.width = `${popupElement.offsetWidth}px`;
+ 
+       // Reset first
++      // Clear inset shorthand first: on some Windows Chromium builds, the browser
++      // serializes left/top/right/bottom into the `inset` shorthand, after which
++      // longhand assignments below fail to take effect. Clearing inset forces
++      // the longhands to win.
++      popupElement.style.inset = '';
+       popupElement.style.left = '0';
+       popupElement.style.top = '0';
+       popupElement.style.right = 'auto';
+diff --git a/node_modules/@rc-component/trigger/lib/hooks/useAlign.js b/node_modules/@rc-component/trigger/lib/hooks/useAlign.js
+index e2c17df..4994122 100644
+--- a/node_modules/@rc-component/trigger/lib/hooks/useAlign.js
++++ b/node_modules/@rc-component/trigger/lib/hooks/useAlign.js
+@@ -131,6 +131,7 @@ function useAlign(open, popupEle, target, placement, builtinPlacements, popupAli
+       placeholderElement.style.width = `${popupElement.offsetWidth}px`;
+ 
+       // Reset first
++      popupElement.style.inset = '';
+       popupElement.style.left = '0';
+       popupElement.style.top = '0';
+       popupElement.style.right = 'auto';

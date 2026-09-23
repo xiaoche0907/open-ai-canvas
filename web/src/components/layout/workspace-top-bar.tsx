@@ -18,6 +18,7 @@ const PAGE_TITLES: Record<string, string> = {
     projects: "短剧 Agent",
     canvas: "自由画布",
     apps: "AI应用",
+    "ai-news": "AI资讯",
     tasks: "创作历史",
     assets: "资产",
     skills: "技能",

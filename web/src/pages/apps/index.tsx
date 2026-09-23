@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router";
 import { Button, Tag } from "antd";
 import { AppModal } from "@/components/ui/product/app-modal";
 import { ImageGeneratorWorkspace } from "./image-generator";
+import { UniversalTryonWorkspace } from "./universal-tryon";
 import {
     Search,
     ChevronDown,
@@ -61,15 +62,15 @@ const ALL_TOOLS: ToolItem[] = [
         promptHint: "",
     },
     {
-        id: "product-replace",
+        id: "universal-tryon",
         sectionId: "main-visual",
-        title: "产品替换",
-        bannerPrefix: "产品",
-        bannerHighlight: "替换",
-        desc: "保留原图构图与氛围，一键替换画面产品。",
-        tag: "场景保真",
-        categories: ["lifestyle", "food"],
-        promptHint: "保持背景与环境光影不变，将中央商品替换为新品",
+        title: "AI 万物上身",
+        bannerPrefix: "万物",
+        bannerHighlight: "上身",
+        desc: "模特换装、人台试穿、鞋靴上脚，Agent 全流程自然拟合交付高清大图。",
+        tag: "虚拟试衣",
+        categories: ["fashion"],
+        promptHint: "高级时装模特，服装自然褶皱与垂坠感，专业影棚柔光，4K高清质感",
     },
     {
         id: "partial-replace",
@@ -84,17 +85,6 @@ const ALL_TOOLS: ToolItem[] = [
     },
 
     // 爆款复刻
-    {
-        id: "universal-tryon",
-        sectionId: "viral-replica",
-        title: "AI 万物上身",
-        bannerPrefix: "万物",
-        bannerHighlight: "上身",
-        desc: "模特换装、人台试穿、鞋靴上脚，Agent 全流程自然拟合交付高清大图。",
-        tag: "虚拟试衣",
-        categories: ["fashion"],
-        promptHint: "高级时装模特，服装自然褶皱与垂坠感，专业影棚柔光，4K高清质感",
-    },
     {
         id: "white-background",
         sectionId: "viral-replica",
@@ -286,8 +276,8 @@ function AiAppsCatalog({ onOpenApp }: { onOpenApp: (appId: string) => void }) {
                                         key={tool.id}
                                         className="ai-app-card group"
                                         onClick={() => {
-                                            if (tool.id === "image-gen") {
-                                                onOpenApp("image-gen");
+                                            if (tool.id === "image-gen" || tool.id === "universal-tryon") {
+                                                onOpenApp(tool.id);
                                             } else {
                                                 setActiveTool(tool);
                                             }
@@ -318,8 +308,8 @@ function AiAppsCatalog({ onOpenApp }: { onOpenApp: (appId: string) => void }) {
                                                 aria-label="查看详情"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    if (tool.id === "image-gen") {
-                                                        onOpenApp("image-gen");
+                                                    if (tool.id === "image-gen" || tool.id === "universal-tryon") {
+                                                        onOpenApp(tool.id);
                                                     } else {
                                                         setActiveTool(tool);
                                                     }
@@ -450,6 +440,14 @@ export default function AiAppsPage() {
                 }}
             />
         );
+    }
+
+    if (currentApp === "universal-tryon") {
+        return <UniversalTryonWorkspace onBack={() => {
+            const next = new URLSearchParams(searchParams);
+            next.delete("app");
+            setSearchParams(next);
+        }} />;
     }
 
     return (

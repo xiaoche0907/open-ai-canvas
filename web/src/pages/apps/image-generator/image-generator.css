@@ -157,6 +157,14 @@
 }
 
 /* 参考图堆叠：默认收拢，悬停后依次展开 */
+.image-gen-ref-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
 .image-gen-ref-picker {
     width: 68px;
     height: 84px;
@@ -205,6 +213,30 @@
 
 .image-gen-ref-card.is-add:disabled {
     cursor: wait;
+}
+
+.image-gen-ref-import {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 32px;
+    padding: 0 10px;
+    border: 1px dashed color-mix(in srgb, var(--border) 80%, transparent);
+    border-radius: var(--r-md, 8px);
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    color: var(--muted-foreground);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.image-gen-ref-import:hover {
+    color: var(--foreground);
+    border-color: var(--ring);
+    background: color-mix(in srgb, var(--surface) 72%, transparent);
 }
 
 .image-gen-ref-picker:hover .image-gen-ref-card,
@@ -1209,4 +1241,33 @@
         transform: scale(1.6);
         opacity: 0;
     }
+}
+
+/* 生成结果卡片右上角删除按钮 */
+.image-gen-result-delete {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: var(--r-md, 8px);
+    color: var(--color-text-secondary, #aab2c5);
+    background: color-mix(in srgb, var(--color-bg-container, #1d2129) 78%, transparent);
+    cursor: pointer;
+    transition: color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+}
+.image-gen-result-delete:hover {
+    color: var(--color-error, #ff7875);
+    background: color-mix(in srgb, var(--color-error, #ff7875) 12%, var(--color-bg-container, #1d2129));
+    transform: scale(1.05);
+}
+.image-gen-result-delete:focus-visible {
+    outline: 2px solid var(--color-primary, #d9a05b);
+    outline-offset: 1px;
 }

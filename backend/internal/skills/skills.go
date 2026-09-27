@@ -29,6 +29,7 @@ var skillCategoryLabels = map[string]string{
 	"ecommerce": "电商营销",
 	"creative":  "创意设计",
 	"social":    "社媒内容",
+	"aibrand":   "AI品牌",
 	"others":    "其他",
 }
 
@@ -543,6 +544,7 @@ func skillCategories() []SkillCategory {
 		{Value: "ecommerce", Label: skillCategoryLabels["ecommerce"]},
 		{Value: "creative", Label: skillCategoryLabels["creative"]},
 		{Value: "social", Label: skillCategoryLabels["social"]},
+		{Value: "aibrand", Label: skillCategoryLabels["aibrand"]},
 		{Value: "others", Label: skillCategoryLabels["others"]},
 	}
 }

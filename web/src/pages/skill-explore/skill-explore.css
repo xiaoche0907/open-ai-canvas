@@ -1,0 +1,175 @@
+/* ===== 境彻「Skill 灵感广场」（参考 Lovart Explore，支持深浅模式） ===== */
+.se-page { min-height: 100%; background: var(--background); color: var(--foreground); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif; }
+
+/* ---------- Hero ---------- */
+.se-hero { padding-top: 88px; padding-bottom: 70px; text-align: center; }
+.se-hero-title { margin: 0; font-size: 20px; font-weight: 500; color: var(--foreground); text-align: center; letter-spacing: -0.01em; }
+
+/* ---------- Prompt ---------- */
+.se-prompt-box { position: relative; width: 760px; max-width: calc(100% - 32px); min-height: 118px; margin: 24px auto 0; padding: 14px 14px 10px 14px; background: var(--background); border: 1px solid var(--border); border-radius: 24px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.035); text-align: left; transition: border-color 180ms ease, box-shadow 180ms ease; }
+.se-prompt-box.is-focused { border-color: var(--muted-foreground); box-shadow: 0 4px 22px rgba(0, 0, 0, 0.07); }
+.se-prompt-line { display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 8px 6px 0; }
+.se-prompt-box textarea { display: block; width: 100%; min-width: 0; min-height: 52px; max-height: 132px; padding: 0 0 6px 0; border: 0; background: transparent; color: var(--foreground); font: inherit; font-size: 14px; line-height: 1.6; resize: none; outline: none; overflow-y: auto; }
+.se-prompt-box textarea::placeholder { color: var(--muted-foreground); }
+.se-prompt-toolbar { display: flex; align-items: center; justify-content: space-between; }
+.se-prompt-toolbar-right { display: flex; align-items: center; gap: 8px; }
+.se-prompt-model-picker { width: 168px; max-width: min(40vw, 168px); min-width: 0; }
+.se-prompt-icon-btn { display: grid; width: 32px; height: 32px; place-items: center; border: 0; border-radius: 8px; background: transparent; color: var(--muted-foreground); cursor: pointer; transition: background 180ms ease, color 180ms ease; }
+.se-prompt-icon-btn:hover { background: var(--surface-hover); color: var(--foreground); }
+.se-prompt-send { display: grid; width: 32px; height: 32px; place-items: center; border: 0; border-radius: 50%; background: var(--muted); color: var(--muted-foreground); cursor: pointer; transition: background 180ms ease, color 180ms ease, transform 180ms ease; }
+.se-prompt-send:hover { transform: scale(1.04); }
+.se-prompt-send.is-ready { background: var(--primary); color: var(--primary-foreground); }
+.se-prompt-send:disabled, .se-floating-send:disabled { cursor: default; opacity: 0.55; }
+.se-prompt-icon-btn:focus-visible, .se-prompt-send:focus-visible { outline: 2px solid var(--foreground); outline-offset: 2px; }
+
+.se-chat-page { height: 100%; min-height: min(780px, calc(100dvh - 64px)); }
+.se-agent-workspace { display: flex; flex-direction: column; height: calc(100dvh - 64px); min-height: 560px; }
+.se-agent-workspace-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 44px; padding: 0 24px; border-bottom: 1px solid var(--border); font-size: 12px; }
+.se-agent-workspace-header button, .se-agent-workspace-header a { display: inline-flex; align-items: center; gap: 4px; border: 0; background: transparent; color: var(--muted-foreground); text-decoration: none; cursor: pointer; }
+.se-agent-workspace-header button:hover, .se-agent-workspace-header a:hover { color: var(--foreground); }
+.se-agent-workspace-header button:focus-visible, .se-agent-workspace-header a:focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; }
+.se-agent-workspace .canvas-agent-panel.is-inline { position: relative; inset: auto; width: 100%; height: auto; min-height: 0; flex: 1; border-radius: 0; background: var(--agent-surface-base); box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.se-agent-workspace .canvas-agent-panel.is-inline [data-agent-resize] { display: none; }
+.se-agent-workspace .agent-conversation-messages { width: min(760px, 100%); margin-inline: auto; }
+.se-agent-workspace .agent-composer-wrap { width: min(760px, 100%); margin-inline: auto; }
+.se-agent-workspace .agent-composer-surface { border: 1px solid color-mix(in srgb, var(--agent-ink) 14%, transparent); background: var(--agent-surface-base); }
+.se-agent-loading { display: grid; flex: 1; place-items: center; color: var(--muted-foreground); font-size: 14px; }
+.se-agent-error { width: min(760px, calc(100% - 32px)); margin: 12px auto; color: var(--destructive); font-size: 13px; text-align: left; }
+.se-agent-error button { margin-left: 8px; padding: 2px 4px; border: 0; background: transparent; color: inherit; text-decoration: underline; cursor: pointer; }
+.se-spin { animation: se-spin 900ms linear infinite; }
+@keyframes se-spin { to { transform: rotate(360deg); } }
+
+/* ---------- 快捷行 ---------- */
+.se-quick-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; width: 760px; max-width: calc(100% - 32px); margin: 16px auto 0; }
+.se-quick-label { font-size: 13px; color: var(--foreground); }
+.se-chip { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--background); color: var(--foreground); font-size: 13px; cursor: pointer; transition: background 180ms ease, border-color 180ms ease; }
+.se-chip:hover { background: var(--surface-hover); }
+.se-chip:focus-visible { outline: 2px solid var(--foreground); outline-offset: 2px; }
+.se-quick-row + .se-quick-row { margin-top: 8px; }
+
+/* ---------- 主内容 ---------- */
+.se-main { width: min(1540px, calc(100% - 120px)); margin: 0 auto; padding-bottom: 120px; }
+
+/* ---------- 一级导航 ---------- */
+.se-top-nav { display: flex; align-items: center; gap: 6px; }
+.se-top-nav button { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; color: var(--muted-foreground); font-size: 13px; cursor: pointer; transition: background 180ms ease, color 180ms ease; }
+.se-top-nav button:hover { color: var(--foreground); }
+.se-top-nav button.is-active { background: var(--surface-hover); color: var(--foreground); }
+.se-top-nav .se-top-nav-add { padding: 0 8px; color: var(--muted-foreground); }
+.se-top-nav button:focus-visible { outline: 2px solid var(--foreground); outline-offset: 2px; }
+
+/* ---------- 二级分类 ---------- */
+.se-category-tabs { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 20px; margin-top: 15px; }
+.se-category-tabs button { position: relative; height: 32px; padding: 0 2px; border: 0; background: transparent; color: var(--muted-foreground); font-size: 13px; cursor: pointer; transition: color 180ms ease; }
+.se-category-tabs button:hover { color: var(--foreground); }
+.se-category-tabs button.is-active { color: var(--foreground); font-weight: 500; }
+.se-category-tabs button.is-active::after { content: ""; position: absolute; left: 2px; right: 2px; bottom: 2px; height: 2px; background: var(--foreground); }
+.se-category-tabs button:focus-visible { outline: 2px solid var(--foreground); outline-offset: 2px; }
+
+/* ---------- Featured 专题（品牌粉，深浅通用） ---------- */
+.se-featured { display: flex; gap: 36px; align-items: center; height: 280px; margin-top: 26px; padding: 28px 36px; border: 1px solid #f4b9ce; border-radius: 16px; background: color-mix(in srgb, var(--surface) 94%, #f16d9a); }
+.se-featured-info { flex: 0 0 268px; display: flex; flex-direction: column; align-items: flex-start; }
+.se-featured-mark { display: grid; width: 44px; height: 44px; place-items: center; border-radius: 12px; background: rgba(241, 109, 154, 0.14); color: #f16d9a; }
+.se-featured-title { margin: 16px 0 0; font-size: 18px; font-weight: 500; line-height: 1.45; color: var(--foreground); letter-spacing: -0.01em; display: flex; flex-wrap: wrap; align-items: center; gap: 2px; }
+.se-featured-highlight { color: #f16d9a; }
+.se-featured-arrow { color: var(--muted-foreground); margin-left: 2px; }
+.se-featured-icons { display: flex; align-items: center; gap: 8px; margin-top: 18px; }
+.se-featured-icon { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 50%; background: var(--surface); color: var(--muted-foreground); }
+.se-featured-hint { margin: 14px 0 0; color: var(--muted-foreground); font-size: 12px; }
+.se-featured-grid { flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; min-width: 0; }
+.se-featured-card { margin: 0; display: flex; flex-direction: column; gap: 10px; cursor: pointer; }
+.se-featured-card-media { position: relative; display: block; overflow: hidden; border-radius: 10px; background: var(--surface); }
+.se-featured-card-media img, .se-featured-card-media video { display: block; width: 100%; aspect-ratio: 1.32 / 1; object-fit: cover; transition: transform 180ms ease; }
+.se-featured-card:hover .se-featured-card-media img, .se-featured-card:hover .se-featured-card-media video { transform: scale(1.015); }
+.se-featured-card-title { display: flex; align-items: center; gap: 5px; font-size: 14px; color: var(--foreground); }
+.se-featured-card-title svg { color: #f16d9a; }
+
+/* ---------- Feed ---------- */
+.se-feed { margin-top: 24px; }
+.se-skill-section + .se-skill-section { margin-top: 0; }
+.se-section-title { display: flex; align-items: center; gap: 2px; margin: 28px 0 14px; font-size: 14px; font-weight: 500; color: var(--foreground); }
+.se-section-title:first-child { margin-top: 0; }
+.se-section-title svg { color: var(--muted-foreground); }
+.se-skill-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+.se-section-empty { padding: 48px 0; color: var(--muted-foreground); font-size: 13px; }
+
+/* ---------- Skill Card ---------- */
+.se-skill-card { cursor: pointer; }
+.se-skill-card:focus-visible, .se-featured-card:focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; border-radius: 10px; }
+.se-skill-media { position: relative; display: block; overflow: hidden; border-radius: 10px; background: var(--surface); }
+.se-skill-media img, .se-skill-media video { display: block; width: 100%; aspect-ratio: 1.32 / 1; object-fit: cover; transition: transform 180ms ease; }
+.se-skill-card:hover .se-skill-media img, .se-skill-card:hover .se-skill-media video { transform: scale(1.015); }
+.se-skill-type-icon { position: absolute; left: 8px; bottom: 8px; display: grid; width: 18px; height: 18px; place-items: center; border-radius: 4px; background: rgba(0, 0, 0, 0.45); color: #ffffff; }
+.se-skill-title { margin: 10px 0 0; font-size: 14px; font-weight: 500; line-height: 1.4; color: var(--foreground); }
+.se-skill-desc { margin: 3px 0 0; font-size: 12px; color: var(--muted-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.se-skill-meta { display: flex; align-items: center; gap: 4px; margin: 6px 0 0; font-size: 11px; color: var(--muted-foreground); }
+.se-skill-avatar { width: 14px; height: 14px; flex: none; border-radius: 50%; }
+.se-skill-meta-arrow { margin-left: auto; color: var(--muted-foreground); }
+
+/* ---------- 底部悬浮 Prompt ---------- */
+.se-floating-bar { position: fixed; bottom: 20px; left: 50%; z-index: 50; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; width: 500px; max-width: calc(100% - 32px); min-height: 46px; padding: 6px 7px 6px 18px; transform: translate(-50%, 14px); opacity: 0; pointer-events: none; background: color-mix(in srgb, var(--background) 94%, transparent); border: 1px solid var(--border); border-radius: 22px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); backdrop-filter: blur(8px); transition: opacity 200ms ease, transform 200ms ease; }
+.se-floating-bar .se-prompt-chips { flex-basis: 100%; padding: 2px 0; }
+.se-floating-bar.is-visible { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.se-floating-bar input { flex: 1; min-width: 120px; border: 0; background: transparent; color: var(--foreground); font: inherit; font-size: 13px; outline: none; }
+.se-floating-bar input::placeholder { color: var(--muted-foreground); }
+.se-floating-send { display: grid; width: 32px; height: 32px; flex: none; place-items: center; border: 0; border-radius: 50%; background: var(--primary); color: var(--primary-foreground); cursor: pointer; transition: background 180ms ease, transform 180ms ease; }
+.se-floating-send:hover { transform: scale(1.04); }
+.se-floating-send:focus-visible { outline: 2px solid var(--foreground); outline-offset: 2px; }
+
+/* ---------- 响应式（Desktop 优先，不破坏 5 列） ---------- */
+@media (max-width: 1439px) {
+    .se-skill-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 1199px) {
+    .se-skill-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .se-featured { height: auto; flex-direction: column; align-items: flex-start; }
+    .se-featured-grid { width: 100%; }
+}
+@media (max-width: 900px) {
+    .se-main { width: calc(100% - 48px); }
+    .se-featured { padding: 22px; }
+    .se-featured-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); overflow-x: auto; }
+}
+@media (max-width: 767px) {
+    .se-skill-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .se-hero { padding-top: 56px; padding-bottom: 48px; }
+    .se-prompt-box { width: calc(100% - 32px); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .se-prompt-box, .se-prompt-icon-btn, .se-prompt-send, .se-chip, .se-top-nav button, .se-category-tabs button, .se-featured-card-media img, .se-skill-media img, .se-floating-send { transition: none; }
+    .se-featured-card:hover .se-featured-card-media img, .se-skill-card:hover .se-skill-media img { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { .se-spin { animation: none; } }
+
+/* ---------- 添加到对话（hover） ---------- */
+.se-add-to-chat {
+    position: absolute; top: 8px; right: 8px; z-index: 2;
+    display: flex; align-items: center; gap: 4px;
+    height: 28px; padding: 0 12px;
+    border: none; border-radius: 999px;
+    background: rgba(255, 255, 255, 0.96); color: #111111;
+    font-size: 12px; font-weight: 500; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    opacity: 0; transform: translateY(-3px);
+    transition: opacity 160ms ease, transform 160ms ease, background 160ms ease;
+}
+.se-featured-card:hover .se-add-to-chat,
+.se-skill-card:hover .se-add-to-chat,
+.se-featured-card:focus-within .se-add-to-chat,
+.se-skill-card:focus-within .se-add-to-chat,
+.se-add-to-chat:focus-visible { opacity: 1; transform: translateY(0); }
+.se-add-to-chat:focus-visible { outline: 2px solid var(--foreground); outline-offset: -2px; }
+.se-add-to-chat:hover { background: #ffffff; }
+
+/* ---------- Composer Skill Context ---------- */
+.se-prompt-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; max-width: 100%; }
+.se-prompt-chip { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; min-height: 26px; padding: 2px 5px 2px 9px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--foreground); font-size: 12px; font-weight: 500; animation: se-chip-enter 150ms ease-out both; }
+.se-prompt-chip.is-removing { opacity: 0; transform: scale(0.96); transition: opacity 130ms ease-in, transform 130ms ease-in; animation: none; }
+.se-prompt-chip-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.se-prompt-chip-remove { display: grid; width: 17px; height: 17px; flex: none; place-items: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--muted-foreground); cursor: pointer; opacity: 0; transition: opacity 150ms ease, background 150ms ease, color 150ms ease; }
+.se-prompt-chip:hover .se-prompt-chip-remove, .se-prompt-chip-remove:focus-visible { opacity: 1; }
+.se-prompt-chip-remove:hover { background: var(--surface-hover); color: var(--foreground); }
+.se-prompt-chip-remove:focus-visible { outline: 2px solid var(--foreground); outline-offset: 1px; }
+@keyframes se-chip-enter { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+@media (hover: none) { .se-add-to-chat, .se-prompt-chip-remove { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .se-prompt-chip { animation: none; } .se-prompt-chip.is-removing, .se-prompt-chip-remove { transition: none; } }

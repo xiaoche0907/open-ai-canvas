@@ -3,7 +3,7 @@ import { createBrowserRouter, Navigate, Outlet, useLocation } from "react-router
 
 import { RequireAuth } from "@/components/auth/require-auth";
 import { FullScreenLoader, WorkspaceRouteLoader } from "@/components/ui/aceternity/full-screen-loader";
-import { loadAiNewsPage, loadAssetsPage, loadCanvasPage, loadCanvasProjectPage, loadCreatePage, loadProjectDetailPage, loadProjectsPage } from "@/lib/workspace-route-modules";
+import { loadAiBrandPage, loadAiNewsPage, loadSkillExplorePage, loadAssetsPage, loadCanvasPage, loadCanvasProjectPage, loadCreatePage, loadProjectDetailPage, loadProjectsPage } from "@/lib/workspace-route-modules";
 import { CanvasRefreshShell } from "@/pages/canvas/canvas-refresh-shell";
 import { AuthScene } from "@/pages/auth/auth-scene";
 import RouteErrorPage from "@/pages/route-error";
@@ -46,6 +46,8 @@ const CreatePage = lazy(loadCreatePage);
 const NotFound = lazy(() => import("@/pages/not-found"));
 const AiAppsPage = lazy(() => import("@/pages/apps"));
 const AiNewsPage = lazy(loadAiNewsPage);
+const AiBrandPage = lazy(loadAiBrandPage);
+const SkillExplorePage = lazy(loadSkillExplorePage);
 const SkillsPage = lazy(() => import("@/pages/skills"));
 const PluginsPage = lazy(() => import("@/pages/plugins"));
 const EagleLibraryPage = lazy(() => import("@/pages/plugins/eagle"));
@@ -118,6 +120,8 @@ export const router = createBrowserRouter([
             { path: "/assets", element: <RequireAuth>{deferred(<AssetsPage />)}</RequireAuth> },
             { path: "/apps", element: <RequireAuth>{deferred(<AiAppsPage />)}</RequireAuth> },
             { path: "/ai-news", element: <RequireAuth>{deferred(<AiNewsPage />)}</RequireAuth> },
+            { path: "/ai-brand", element: <RequireAuth>{deferred(<AiBrandPage />)}</RequireAuth> },
+            { path: "/skill-explore", element: <RequireAuth>{deferred(<SkillExplorePage />)}</RequireAuth> },
             { path: "/skills", element: <RequireAuth>{deferred(<SkillsPage />)}</RequireAuth> },
             {
                 path: "/plugins",

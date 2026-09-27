@@ -43,11 +43,12 @@ import { live2DModelURL } from "@/services/api/appearance";
 import { Live2DAvatar } from "./live2d-avatar";
 import "./canvas-cloud-agent.css";
 
-type CloudAgentPanelProps = { canvasId: string; domainProjectId?: string; nodeCount: number; selectedNodeIds: string[]; references: CanvasResourceReference[]; open: boolean; prefillPrompt?: string; onOpen: () => void; onCollapse: () => void; onFocusNode?: (nodeId: string) => void };
+type AgentInitialSubmission = { id: string; prompt: string; skillIds: string[] };
+type CloudAgentPanelProps = { canvasId: string; domainProjectId?: string; nodeCount: number; selectedNodeIds?: string[]; references: CanvasResourceReference[]; open: boolean; prefillPrompt?: string; inline?: boolean; clearSkillsAfterSubmit?: boolean; initialSubmission?: AgentInitialSubmission; onInitialSubmissionAccepted?: () => void; onOpen: () => void; onCollapse: () => void; onFocusNode?: (nodeId: string) => void };
 type ApprovalState = { approvalId: string; detail: Record<string, unknown>; reason: string };
 type AgentPanelView = "chat" | "history" | "settings";
 
-export function CanvasCloudAgentPanel({ canvasId, domainProjectId, nodeCount, selectedNodeIds, references, open, prefillPrompt, onOpen, onCollapse, onFocusNode }: CloudAgentPanelProps) {
+export function CanvasCloudAgentPanel({ canvasId, domainProjectId, nodeCount, selectedNodeIds = [], references, open, prefillPrompt, inline = false, clearSkillsAfterSubmit = false, initialSubmission, onInitialSubmissionAccepted, onOpen, onCollapse, onFocusNode }: CloudAgentPanelProps) {
     const userId = useUserStore((state) => state.user?.id);
     const appearance = useAppearanceStore((state) => state.appearance.canvas) || DEFAULT_CANVAS_APPEARANCE;
     const theme = canvasThemes[useActiveTheme()];
@@ -69,6 +70,7 @@ export function CanvasCloudAgentPanel({ canvasId, domainProjectId, nodeCount, se
     const [profileError, setProfileError] = useState<string>();
     const profileRequestRef = useRef(0);
     const [skills, setSkills] = useState<Skill[]>([]);
+    const [skillsHydrated, setSkillsHydrated] = useState(false);
     const [selectedSkillIds, setSelectedSkillIds] = useState<string[]>([]);
     const [marketSkills, setMarketSkills] = useState<Skill[]>([]);
     const [skillSearch, setSkillSearch] = useState("");
@@ -119,6 +121,8 @@ export function CanvasCloudAgentPanel({ canvasId, domainProjectId, nodeCount, se
     const approvalRequestRef = useRef<string | null>(null);
     const pendingSubmission = useRef<CloudAgentPendingSubmission | null>(null);
     const submissionRequestRef = useRef(false);
+    const initialSubmissionAppliedRef = useRef<string | null>(null);
+    const initialSubmissionStartedRef = useRef<string | null>(null);
     const conversationScope = `${canvasId}:${activeConversationId}`;
     const currentScope = useRef(conversationScope);
     currentScope.current = conversationScope;
@@ -307,9 +311,10 @@ export function CanvasCloudAgentPanel({ canvasId, domainProjectId, nodeCount, se
             .then((result) => {
                 if (!active) return;
                 setSkills(result.skills);
+                setSkillsHydrated(true);
                 setMessages((current) => current.filter((message) => message.id !== "skills-load-error"));
             })
-            .catch((cause) => { if (active) setMessages((current) => appendAgentError(current, "skills-load-error", cause, "技能库读取失败")); }); };
+            .catch((cause) => { if (active) { setSkillsHydrated(false); setMessages((current) => appendAgentError(current, "skills-load-error", cause, "技能库读取失败")); } }); };
         refresh();
         window.addEventListener("canvas-skills-changed", refresh);
         window.addEventListener("focus", refresh);
@@ -520,7 +525,7 @@ export function CanvasCloudAgentPanel({ canvasId, domainProjectId, nodeCount, se
         }
     };
 
-    const submit = async (override?: string) => {
+    const submit = async (override?: string, onAccepted?: () => void) => {
         const value = (override ?? prompt).trim();
         if (running) {
             await interject(value);
@@ -569,7 +574,10 @@ export function CanvasCloudAgentPanel({ canvasId, domainProjectId, nodeCount, se
             }
             const submission = pendingSubmission.current!;
             const request = submission.request!;
-            const nextMessages = appendUniqueMessage(messages, { id: submission.messageId || `user-${submission.key}`, role: "user", text: request.prompt });
+            const nextMessages = appendUniqueMessage(messages, {
+                id: submission.messageId || `user-${submission.key}`, role: "user", text: request.prompt,
+                skills: (request.skillIds || []).map((id) => ({ id, name: installedSkills.find((skill) => skill.skillId === id)?.skillName || id })),
+            });
             const now = new Date().toISOString();
             const existing = conversations.find((item) => item.id === activeConversationId);
             // Persist a discoverable conversation before POST as well as its key;
@@ -587,9 +595,11 @@ export function CanvasCloudAgentPanel({ canvasId, domainProjectId, nodeCount, se
             if (currentScope.current === scope) {
                 setContextUsage(emptyAgentContextUsage(result.run.id));
                 setRun(result.run);
+                if (clearSkillsAfterSubmit) setSelectedSkillIds([]);
             }
             await clearCloudAgentPendingSubmission(canvasId, activeConversationId);
             if (currentScope.current === scope) pendingSubmission.current = null;
+            if (currentScope.current === scope) onAccepted?.();
         } catch (cause) {
             if (currentScope.current !== scope) return;
             if (!accepted) {
@@ -612,6 +622,21 @@ export function CanvasCloudAgentPanel({ canvasId, domainProjectId, nodeCount, se
             if (currentScope.current === scope) setBusy(false);
         }
     };
+
+    useEffect(() => {
+        if (!initialSubmission || initialSubmissionAppliedRef.current === initialSubmission.id || !historyHydrated || !pendingHydrated) return;
+        initialSubmissionAppliedRef.current = initialSubmission.id;
+        setPrompt(initialSubmission.prompt);
+        setSelectedSkillIds(initialSubmission.skillIds);
+    }, [initialSubmission, historyHydrated, pendingHydrated]);
+
+    useEffect(() => {
+        if (!initialSubmission || initialSubmissionStartedRef.current === initialSubmission.id || initialSubmissionAppliedRef.current !== initialSubmission.id || !historyHydrated || !pendingHydrated || !skillsHydrated || !profileView || profileLoading || profileError) return;
+        if (initialSubmission.skillIds.some((id) => !installedSkills.some((skill) => skill.skillId === id))) return;
+        if (selectedSkillIds.length !== initialSubmission.skillIds.length || initialSubmission.skillIds.some((id) => !selectedSkillIds.includes(id))) return;
+        initialSubmissionStartedRef.current = initialSubmission.id;
+        void submit(initialSubmission.prompt, onInitialSubmissionAccepted);
+    }, [initialSubmission, historyHydrated, pendingHydrated, skillsHydrated, profileView, profileLoading, profileError, installedSkills, selectedSkillIds, onInitialSubmissionAccepted]);
 
     const stop = async () => {
         const activeRun = run;
@@ -775,12 +800,12 @@ export function CanvasCloudAgentPanel({ canvasId, domainProjectId, nodeCount, se
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.985 }}
                         transition={{ duration: reducedMotion ? 0 : 0.26, ease: [0.16, 1, 0.3, 1] }}
-                        className="canvas-agent-panel fixed z-[calc(var(--z-toast)+1)] flex min-w-0 flex-col overflow-hidden"
-                        style={{ ...panelLayout.style, "--agent-surface-base": theme.node.panel, "--agent-ink": theme.node.text, "--agent-accent": theme.accent.primary, "--agent-shadow-color": theme.spatial.shadow } as CSSProperties & Record<`--${string}`, string>}
+                        className={cn("canvas-agent-panel flex min-w-0 flex-col overflow-hidden", inline ? "is-inline" : "fixed z-[calc(var(--z-toast)+1)]")}
+                        style={{ ...(inline ? {} : panelLayout.style), "--agent-surface-base": theme.node.panel, "--agent-ink": theme.node.text, "--agent-accent": theme.accent.primary, "--agent-shadow-color": theme.spatial.shadow } as CSSProperties & Record<`--${string}`, string>}
                         aria-label="Agent 工作台"
                         data-canvas-no-zoom
                         data-canvas-wheel-scroll
-                        {...panelLayout.pointerHandlers}
+                        {...(inline ? {} : panelLayout.pointerHandlers)}
                         onWheel={(event) => event.stopPropagation()}
                     >
                         <div data-agent-resize="north" className="absolute inset-x-5 top-0 z-10 hidden h-2 cursor-n-resize touch-none sm:block" />
@@ -933,6 +958,8 @@ export function CanvasCloudAgentPanel({ canvasId, domainProjectId, nodeCount, se
                                         stopping={stopping}
                                         references={[...references, ...buildSkillMentionReferences(installedSkills)]}
                                         slashSkills={installedSkills}
+                                        selectedSkills={enabledSkills.map((skill) => ({ id: skill.skillId, name: skill.skillName }))}
+                                        onRemoveSkill={(id) => setSelectedSkillIds((current) => current.filter((item) => item !== id))}
                                         includeAssetLibrary={false}
                                         submitAccessory={<AgentContextRing view={presentAgentContextUsage(contextUsage)} />}
                                         left={

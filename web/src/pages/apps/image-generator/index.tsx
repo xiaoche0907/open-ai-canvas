@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router";
-import { message } from "antd";
+import { App } from "antd";
 import { nanoid } from "nanoid";
 import { Sparkles, ArrowLeft } from "lucide-react";
 
 import { modelOptionName, resolveModelChannel, useConfigStore, useEffectiveConfig } from "@/stores/use-config-store";
-import { useAssetStore } from "@/stores/use-asset-store";
+import { useAssetStore, type ImageAsset } from "@/stores/use-asset-store";
 import { uploadImage } from "@/services/image-storage";
 import { runBackendGenerationTask, runBackendGenerationTaskBatch } from "@/services/api/generation-task";
 import { creationCanvasHandoffPath } from "@/lib/canvas/canvas-asset-handoff";
@@ -15,16 +15,19 @@ import { defaultImageCapabilityConfig, modelCapabilityConfigFor, normalizeImageV
 import { modelQuoteRequest, requestCreditCost } from "@/lib/model-pricing";
 import type { ModelRequirements } from "@/lib/model-selection";
 import { quoteModel, type LogicalModelQuote } from "@/services/api/logical-models";
+import { createProject, deleteProject, listProjects, updateProject } from "@/services/api/projects";
+import { resourceFileUrl, resourceIdFromStorageKey } from "@/services/api/resources";
 import { useUserStore } from "@/stores/use-user-store";
 import { useCanvasStore } from "@/stores/canvas/use-canvas-store";
 import { CanvasCloudAgentPanel } from "@/components/canvas/canvas-cloud-agent-panel";
 import { buildCanvasAgentMentionReferences } from "@/lib/canvas/canvas-resource-references";
 import { createCanvasNode } from "@/lib/canvas/canvas-project-domain";
 import { CanvasNodeType } from "@/types/canvas";
-import { createCanvasProjectWithRemoteSync, hasRemoteUserDataSyncSession, loadCanvasProjectForEditing, saveRemoteUserDataNow } from "@/services/user-data-sync";
+import { createCanvasProjectWithRemoteSync, hasRemoteUserDataSyncSession, loadAssetsForUse, loadCanvasProjectForEditing, localSavedRemotePendingMessage, saveRemoteUserDataNow } from "@/services/user-data-sync";
 
 import { FloatingGenerationDock } from "./floating-generation-dock";
 import { InspirationSection } from "./inspiration-section";
+import { AssetLibraryPickerModal } from "@/components/assets/asset-library-picker-modal";
 import { CanvasWorkspaceView } from "./canvas-workspace-view";
 import { ImageGenProjectSidebar } from "./project-sidebar";
 
@@ -65,6 +68,7 @@ interface ImageGeneratorProps {
 }
 
 export function ImageGeneratorWorkspace({ onBack }: ImageGeneratorProps) {
+    const { message } = App.useApp();
     const navigate = useNavigate();
 
     // 全局配置与模型
@@ -75,6 +79,7 @@ export function ImageGeneratorWorkspace({ onBack }: ImageGeneratorProps) {
 
     // 当前视图模式（发现态 vs 工作台态）
     const [viewMode, setViewMode] = useState<GeneratorViewMode>("discovery");
+    const [assetPickerOpen, setAssetPickerOpen] = useState(false);
 
     // 创作输入状态
     const [taskTitle, setTaskTitle] = useState("商业视觉创作");
@@ -202,33 +207,126 @@ export function ImageGeneratorWorkspace({ onBack }: ImageGeneratorProps) {
         }
     }, []);
 
-    // 加载项目；首次升级时把旧生成历史迁移为项目。
+    // 把 AI 图片生成项目同步到后端（type=image-gen）：结果图片本身已入「我的资产」，
+    // 这里留存项目标题/封面/结果索引，保证项目跨会话在后端可见。
+    const syncProjectToBackend = useCallback(async (project: ImageGenProject) => {
+        try {
+            const resultKeys = (project.results || []).filter((item) => item.storageKey).map((item) => ({
+                storageKey: item.storageKey,
+                prompt: item.prompt,
+                model: item.model,
+                createdAt: item.createdAt,
+            }));
+            const description = JSON.stringify({ v: 1, results: resultKeys });
+            const coverResourceId = project.results.find((item) => item.storageKey)
+                ? resourceIdFromStorageKey(project.results.find((item) => item.storageKey)!.storageKey!)
+                : undefined;
+            if (project.backendId) {
+                await updateProject(project.backendId, {
+                    name: project.title || "AI 图像生成",
+                    description,
+                    ...(coverResourceId ? { coverResourceId } : {}),
+                });
+                return;
+            }
+            const created = await createProject({
+                name: project.title || "AI 图像生成",
+                type: "image-gen",
+                aspectRatio: project.params.ratio || "1:1",
+                sourceType: "ai-image-gen",
+                description,
+                ...(coverResourceId ? { coverResourceId } : {}),
+                ...(project.model ? { defaultImageModel: project.model } : {}),
+            });
+            const backendId = created?.project?.id;
+            if (backendId) {
+                setProjects((current) => {
+                    const next = current.map((item) => item.id === project.id ? { ...item, backendId } : item);
+                    void persistProjects(next);
+                    return next;
+                });
+            }
+        } catch (err) {
+            console.warn("[ImageGenerator] Failed to sync project to backend:", err);
+        }
+    }, [persistProjects]);
+
+    // 加载项目；首次升级时把旧生成历史迁移为项目；再合并后端已留存的 image-gen 项目。
     useEffect(() => {
         let mounted = true;
+        const mergeCloudProjects = async (local: ImageGenProject[]) => {
+            const localByBackend = new Map(local.filter((project) => project.backendId).map((project) => [project.backendId, project] as const));
+            try {
+                const data = await listProjects();
+                const cloudProjects = (data?.projects || []).filter((entry) => entry.project?.type === "image-gen");
+                const cloudItems: ImageGenProject[] = [];
+                for (const entry of cloudProjects) {
+                    const backend = entry.project;
+                    if (localByBackend.has(backend.id)) continue;
+                    let results: GeneratedImageItem[] = [];
+                    try {
+                        const desc = JSON.parse(backend.description || "");
+                        if (desc && Array.isArray(desc.results)) {
+                            results = desc.results.filter((item: { storageKey?: string }) => item?.storageKey).map((item: { storageKey: string; prompt?: string; model?: string; createdAt?: string }) => ({
+                                id: `cloud-${backend.id}-${item.storageKey}`,
+                                url: resourceFileUrl(resourceIdFromStorageKey(item.storageKey)),
+                                storageKey: item.storageKey,
+                                prompt: item.prompt,
+                                model: item.model,
+                                createdAt: item.createdAt || backend.createdAt,
+                            }));
+                        }
+                    } catch { /* 描述结构不兼容时忽略恢复 */ }
+                    cloudItems.push({
+                        id: `cloud-${backend.id}`,
+                        backendId: backend.id,
+                        title: backend.name || "AI 图像生成",
+                        prompt: "",
+                        model: backend.defaultImageModel || "",
+                        params: { ratio: backend.aspectRatio || "1:1", quality: "2K", format: "png", count: "1" },
+                        references: [],
+                        results,
+                        pinned: false,
+                        createdAt: backend.createdAt,
+                        updatedAt: backend.updatedAt,
+                    });
+                }
+                if (mounted) setProjects([...cloudItems, ...local]);
+            } catch (err) {
+                console.warn("[ImageGenerator] Failed to merge cloud projects:", err);
+                if (mounted) setProjects(local);
+            }
+        };
         const loadProjects = async () => {
             try {
                 const storage = localForageStorageForScope(getActiveUserScope());
                 const rawProjects = await storage.getItem(PROJECTS_STORAGE_KEY);
                 if (rawProjects) {
                     const parsed = JSON.parse(String(rawProjects)) as ImageGenProject[];
-                    if (Array.isArray(parsed) && mounted) setProjects(parsed);
-                    return;
+                    if (Array.isArray(parsed)) {
+                        if (mounted) await mergeCloudProjects(parsed);
+                        return;
+                    }
                 }
 
                 const rawHistory = await storage.getItem(HISTORY_STORAGE_KEY);
-                if (rawHistory && mounted) {
+                if (rawHistory) {
                     const records = JSON.parse(String(rawHistory)) as ImageGenHistoryRecord[];
-                    if (!Array.isArray(records)) return;
-                    const migrated = records.map((record) => ({
-                        ...record,
-                        pinned: false,
-                        updatedAt: record.createdAt,
-                    } satisfies ImageGenProject));
-                    setProjects(migrated);
-                    await storage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(migrated));
+                    if (Array.isArray(records)) {
+                        const migrated = records.map((record) => ({
+                            ...record,
+                            pinned: false,
+                            updatedAt: record.createdAt,
+                        } satisfies ImageGenProject));
+                        await storage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(migrated));
+                        if (mounted) await mergeCloudProjects(migrated);
+                        return;
+                    }
                 }
+                if (mounted) await mergeCloudProjects([]);
             } catch (err) {
                 console.warn("[ImageGenerator] Failed to load projects:", err);
+                if (mounted) await mergeCloudProjects([]);
             }
         };
         void loadProjects();
@@ -297,6 +395,10 @@ export function ImageGeneratorWorkspace({ onBack }: ImageGeneratorProps) {
     }, [persistProjects]);
 
     const handleDeleteProject = useCallback((id: string) => {
+        const target = projects.find((project) => project.id === id);
+        if (target?.backendId) {
+            void deleteProject(target.backendId).catch((err) => console.warn("[ImageGenerator] Failed to delete backend project:", err));
+        }
         setProjects((current) => {
             const next = current.filter((project) => project.id !== id);
             void persistProjects(next);
@@ -316,7 +418,7 @@ export function ImageGeneratorWorkspace({ onBack }: ImageGeneratorProps) {
             return next;
         });
         message.success("项目已删除，资产库中的图片仍然保留");
-    }, [activeProjectId, loadProject, persistProjects]);
+    }, [activeProjectId, loadProject, persistProjects, projects]);
 
     const handleChangeProjectTitle = useCallback((title: string) => {
         setTaskTitle(title);
@@ -338,7 +440,7 @@ export function ImageGeneratorWorkspace({ onBack }: ImageGeneratorProps) {
         });
     }, [persistProjects]);
 
-    const syncReferencesToAgentCanvas = useCallback(async (canvasId: string) => {
+    const syncReferencesToAgentCanvas = useCallback(async (canvasId: string, refs: UploadedReferenceImage[] = referenceImages) => {
         const store = useCanvasStore.getState();
         const canvas = store.openProject(canvasId);
         if (!canvas) throw new Error("Agent 工作画布尚未加载，请重试");
@@ -346,7 +448,7 @@ export function ImageGeneratorWorkspace({ onBack }: ImageGeneratorProps) {
             const value = node.metadata?.pluginData?.imageGeneratorReferenceId;
             return typeof value === "string" ? [value] : [];
         }));
-        const missingReferences = referenceImages.filter((reference) => !existingReferenceIds.has(reference.id));
+        const missingReferences = refs.filter((reference) => !existingReferenceIds.has(reference.id));
         if (missingReferences.length) {
             const nodes = [
                 ...canvas.nodes,
@@ -357,7 +459,7 @@ export function ImageGeneratorWorkspace({ onBack }: ImageGeneratorProps) {
         await saveRemoteUserDataNow(canvasId);
     }, [referenceImages]);
 
-    const enterAgentMode = useCallback(async () => {
+    const enterAgentMode = useCallback(async (extraReferences?: UploadedReferenceImage[]) => {
         if (agentPreparing) return;
         if (!canvasHydrated) {
             message.warning("画布数据仍在加载，请稍后再进入 Agent");
@@ -379,7 +481,7 @@ export function ImageGeneratorWorkspace({ onBack }: ImageGeneratorProps) {
                     prompt,
                     model: selectedModel,
                     params: { ...params },
-                    references: [...referenceImages],
+                    references: [...referenceImages, ...(extraReferences || [])],
                     results: [...currentResultsRef.current],
                     pinned: false,
                     createdAt: now,
@@ -398,7 +500,7 @@ export function ImageGeneratorWorkspace({ onBack }: ImageGeneratorProps) {
             if (canvasId) {
                 await loadCanvasProjectForEditing(canvasId);
             } else {
-                const initialNodes = referenceImages.map(createAgentReferenceNode);
+                const initialNodes = [...referenceImages, ...(extraReferences || [])].map(createAgentReferenceNode);
                 const created = await createCanvasProjectWithRemoteSync(`图像 Agent · ${imageProject.title}`, undefined, {
                     nodes: initialNodes,
                     connections: [],
@@ -408,7 +510,7 @@ export function ImageGeneratorWorkspace({ onBack }: ImageGeneratorProps) {
                 if (created.syncError) throw new Error("Agent 工作画布已保存在本机，但云端同步失败，请重试");
             }
 
-            await syncReferencesToAgentCanvas(canvasId);
+            await syncReferencesToAgentCanvas(canvasId, [...referenceImages, ...(extraReferences || [])]);
             setViewMode("workspace");
             setGenerationMode("agent");
             setAgentOpen(true);
@@ -525,18 +627,37 @@ export function ImageGeneratorWorkspace({ onBack }: ImageGeneratorProps) {
             const pendingCount = uploaded.filter((entry) => entry.pendingRemoteUpload).length;
 
             if (uploaded.length) {
-                setReferenceImages((current) => [...current, ...uploaded.map((entry) => entry.reference)].slice(0, MAX_REFERENCE_IMAGES));
+                const merged = [...referenceImages, ...uploaded.map((entry) => entry.reference)].slice(0, MAX_REFERENCE_IMAGES);
+                setReferenceImages(merged);
+
+                if (generationMode === "agent" && activeImageProject?.canvasId) {
+                    try {
+                        await syncReferencesToAgentCanvas(activeImageProject.canvasId, merged);
+                    } catch (syncErr) {
+                        message.warning(localSavedRemotePendingMessage("参考图已上传，但同步到 Agent 画布失败", syncErr));
+                    }
+                }
+            }
+
+            let syncNote = "";
+            if (uploaded.length) {
+                try {
+                    await saveRemoteUserDataNow();
+                    syncNote = "并已同步到云端资产";
+                } catch (syncErr) {
+                    syncNote = localSavedRemotePendingMessage("已保存在本地", syncErr);
+                }
             }
 
             if (!uploaded.length) {
                 const firstFailure = settled.find((entry) => entry.status === "rejected");
                 message.error(firstFailure?.status === "rejected" && firstFailure.reason instanceof Error ? firstFailure.reason.message : "参考图上传失败");
             } else if (failedCount) {
-                message.warning(`${uploaded.length} 张参考图已加入「我的资产」，${failedCount} 张上传失败`);
+                message.warning(`${uploaded.length} 张参考图已加入「我的资产」，${failedCount} 张上传失败；${syncNote}`);
             } else if (pendingCount) {
                 message.warning(`${uploaded.length} 张参考图已加入「我的资产」，其中 ${pendingCount} 张暂存本机并等待服务端同步`);
             } else {
-                message.success(`${uploaded.length} 张参考图已上传，并全部加入「我的资产」`);
+                message.success(`${uploaded.length} 张参考图已上传，并全部加入「我的资产」，${syncNote}`);
             }
         } finally {
             setUploadingRef(false);
@@ -700,29 +821,37 @@ export function ImageGeneratorWorkspace({ onBack }: ImageGeneratorProps) {
 
             const nextResults = [...currentResults, ...newItems];
             setCurrentResults(nextResults);
+            const projectUpdate = projects.find((project) => project.id === generationProjectId);
+            const updatedAt = new Date().toISOString();
+            const update: ImageGenProject = {
+                id: generationProjectId,
+                canvasId: projectUpdate?.canvasId,
+                backendId: projectUpdate?.backendId,
+                title: taskTitle || trimmed.slice(0, 24),
+                prompt: trimmed,
+                model: selectedModel,
+                params: { ...params },
+                references: [...referenceImages],
+                results: nextResults,
+                pinned: projectUpdate?.pinned || false,
+                createdAt: projectUpdate?.createdAt || updatedAt,
+                updatedAt,
+            };
             setProjects((current) => {
-                const updatedAt = new Date().toISOString();
                 const exists = current.some((project) => project.id === generationProjectId);
-                const update: ImageGenProject = {
-                    id: generationProjectId,
-                    canvasId: current.find((project) => project.id === generationProjectId)?.canvasId,
-                    title: taskTitle || trimmed.slice(0, 24),
-                    prompt: trimmed,
-                    model: selectedModel,
-                    params: { ...params },
-                    references: [...referenceImages],
-                    results: nextResults,
-                    pinned: current.find((project) => project.id === generationProjectId)?.pinned || false,
-                    createdAt: current.find((project) => project.id === generationProjectId)?.createdAt || updatedAt,
-                    updatedAt,
-                };
                 const next = exists
                     ? current.map((project) => project.id === generationProjectId ? update : project)
                     : [update, ...current];
                 void persistProjects(next);
                 return next;
             });
-            message.success(`已生成 ${newItems.length} 张图片，并全部入库「我的资产」`);
+            void syncProjectToBackend(update);
+            try {
+                await saveRemoteUserDataNow();
+                message.success(`已生成 ${newItems.length} 张图片，并全部入库「我的资产」`);
+            } catch (syncErr) {
+                message.warning(localSavedRemotePendingMessage(`已生成 ${newItems.length} 张图片并保存在本地`, syncErr));
+            }
         } catch (err) {
             console.error("[ImageGenerator] Generation error:", err);
             message.error(err instanceof Error ? err.message : "图片生成失败，请重试");
@@ -730,6 +859,22 @@ export function ImageGeneratorWorkspace({ onBack }: ImageGeneratorProps) {
             setIsGenerating(false);
         }
     };
+
+    // 3.5 删除单个生成结果（仅从项目结果移除，资产库图片保留）
+    const handleDeleteResult = useCallback((item: GeneratedImageItem) => {
+        if (!activeProjectId) return;
+        setCurrentResults((current) => current.filter((entry) => entry.id !== item.id));
+        setProjects((current) => {
+            const next = current.map((project) => project.id === activeProjectId
+                ? { ...project, results: project.results.filter((entry) => entry.id !== item.id), updatedAt: new Date().toISOString() }
+                : project);
+            const updated = next.find((project) => project.id === activeProjectId);
+            if (updated) void syncProjectToBackend(updated);
+            void persistProjects(next);
+            return next;
+        });
+        message.success("已从结果中移除该图片，资产库中的图片仍然保留");
+    }, [activeProjectId, persistProjects, syncProjectToBackend]);
 
     // 4. 发送到主画布（使用系统推荐无损机制）
     const handleSendToCanvas = (item: GeneratedImageItem) => {
@@ -744,6 +889,69 @@ export function ImageGeneratorWorkspace({ onBack }: ImageGeneratorProps) {
             navigate("/canvas");
         }
     };
+
+    // 4.1 从资产库导入图片作为参考图
+    const handleImportFromAssets = useCallback(async (ids: string[]) => {
+        try {
+            await loadAssetsForUse(ids);
+            const assets = useAssetStore.getState().assets;
+            const imageAssets = assets.filter((asset) => ids.includes(asset.id) && asset.kind === "image");
+            const remaining = MAX_REFERENCE_IMAGES - referenceImages.length;
+            if (remaining <= 0) {
+                message.warning(`最多只能添加 ${MAX_REFERENCE_IMAGES} 张参考图`);
+                setAssetPickerOpen(false);
+                return;
+            }
+            const selected = imageAssets.slice(0, remaining);
+            if (!selected.length) {
+                message.warning("没有可用的图片素材");
+                return;
+            }
+            const refs = selected.map((asset) => {
+                const data = (asset as ImageAsset).data;
+                return {
+                    id: nanoid(),
+                    url: data.dataUrl || asset.coverUrl,
+                    storageKey: data.storageKey,
+                    name: asset.title.slice(0, 30) || "资产图片",
+                    width: data.width,
+                    height: data.height,
+                    bytes: data.bytes,
+                    mimeType: data.mimeType || "image/png",
+                    assetId: asset.id,
+                } satisfies UploadedReferenceImage;
+            });
+            const merged = [...referenceImages, ...refs].slice(0, MAX_REFERENCE_IMAGES);
+            setReferenceImages(merged);
+            message.success(`${refs.length} 张素材已加入参考图${imageAssets.length > remaining ? `，最多 ${MAX_REFERENCE_IMAGES} 张` : ""}`);
+            setAssetPickerOpen(false);
+            if (generationMode === "agent" && activeImageProject?.canvasId) {
+                try {
+                    await syncReferencesToAgentCanvas(activeImageProject.canvasId, merged);
+                } catch (syncErr) {
+                    message.warning(localSavedRemotePendingMessage("素材已加入参考图，但同步到 Agent 画布失败", syncErr));
+                }
+            }
+        } catch (err) {
+            message.error(err instanceof Error ? err.message : "导入素材失败");
+        }
+    }, [activeImageProject?.canvasId, generationMode, referenceImages, syncReferencesToAgentCanvas]);
+
+    // 4.2 发送给 Agent 创作：把生成图作为素材交给画布 Agent
+    const handleSendToAgent = useCallback((item: GeneratedImageItem) => {
+        const reference: UploadedReferenceImage = {
+            id: nanoid(),
+            url: item.url,
+            storageKey: item.storageKey,
+            name: item.prompt?.slice(0, 24) || "生成结果",
+            width: item.width,
+            height: item.height,
+            bytes: item.bytes,
+            mimeType: item.mimeType || "image/png",
+            assetId: item.assetId,
+        };
+        void enterAgentMode([reference]);
+    }, [enterAgentMode]);
 
     // 底部浮动控制坞组件
     const dockElement = (
@@ -766,6 +974,7 @@ export function ImageGeneratorWorkspace({ onBack }: ImageGeneratorProps) {
             mode={generationMode}
             agentPreparing={agentPreparing}
             onChangeMode={handleChangeGenerationMode}
+            onImportFromAssets={() => setAssetPickerOpen(true)}
         />
     );
 
@@ -852,6 +1061,10 @@ export function ImageGeneratorWorkspace({ onBack }: ImageGeneratorProps) {
                         generationStage={generationStage}
                         generationRatio={params.ratio}
                         onSendToCanvas={handleSendToCanvas}
+                        onSendToAgent={handleSendToAgent}
+                        onDeleteResult={handleDeleteResult}
+                        onUploadReference={handleUploadReference}
+                        onImportFromAssets={() => setAssetPickerOpen(true)}
                         generationMode={generationMode}
                         agentPreparing={agentPreparing}
                         onChangeGenerationMode={handleChangeGenerationMode}
@@ -873,6 +1086,21 @@ export function ImageGeneratorWorkspace({ onBack }: ImageGeneratorProps) {
                 </>
             )}
 
+            <AssetLibraryPickerModal
+                remoteLibrary
+                remoteKind="image"
+                open={assetPickerOpen}
+                items={[]}
+                categoryLabels={{ all: "全部素材", material: "素材", role: "角色", scene: "场景", prop: "道具", other: "其他" }}
+                title="选择图片素材"
+                eyebrow="参考图"
+                emptyTitle="还没有图片素材"
+                emptyDescription="先在资产库上传图片，或生成完成后自动入库。"
+                multiple
+                confirmLabel={(count) => `加入参考图${count ? `（${count}）` : ""}`}
+                onClose={() => setAssetPickerOpen(false)}
+                onConfirm={handleImportFromAssets}
+            />
         </div>
     );
 }

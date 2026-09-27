@@ -19,6 +19,8 @@ const PAGE_TITLES: Record<string, string> = {
     canvas: "自由画布",
     apps: "AI应用",
     "ai-news": "AI资讯",
+    "ai-brand": "AI品牌",
+    "skill-explore": "AI品牌",
     tasks: "创作历史",
     assets: "资产",
     skills: "技能",

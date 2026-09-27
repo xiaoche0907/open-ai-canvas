@@ -17,6 +17,7 @@ export type CloudAgentConversationMessage = {
     detail?: unknown;
     attachments?: Array<{ id: string; name: string; url: string }>;
     interjection?: "sent" | "undelivered";
+    skills?: Array<{ id: string; name: string }>;
 };
 
 export type CloudAgentConversation = {

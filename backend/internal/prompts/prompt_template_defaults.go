@@ -15,6 +15,7 @@ const (
 	OperationCharacterTurnaround  = "character_turnaround"
 	OperationShortDramaOutline    = "short_drama_outline"
 	OperationSkillDraft           = "skill_draft"
+	OperationTryonAIWrite         = "tryon_ai_write"
 )
 
 const legacyStoryboardVideoPromptPreamble = "生成单一连续镜头的视频执行提示词。一个镜头只保留一个叙事目标、一个主运镜和一条主要动作链；摄影机运动必须有起点、动机和停止点。优先保证角色身份、表演、关键动作和连续性，次要环境效果可以简化。\n\n"
@@ -114,6 +115,12 @@ func defaultPromptDefinitions() []PromptOperationDefinition {
 			Description:    "根据用户想法生成可复用创作技能的名称、分类、简介和指令草稿。",
 			Variables:      []PromptTemplateVariable{},
 			DefaultContent: `你是一位技能编写助手。根据用户的想法，为一个「可复用的创作技能」生成一份草稿。技能名称简短，不超过 20 个字。分类 tag 必须是 drama、ecommerce、creative、social、others 之一。简介不超过 120 字，说明适用场景、输入条件和最终产出。指令使用 Markdown，至少 300 字，写给后续在画布中使用该技能的模型阅读，必须包含角色设定、输入与约束、分步执行流程、检查清单和输出格式。工具步骤只描述所需能力、输入、输出和确认点，不虚构具体工具名，不把工具、节点、权限、预算或审批写成技能授予的能力；执行时始终以运行环境实际暴露的能力清单为准。`,
+		},
+		{
+			Operation: OperationTryonAIWrite, Label: "AI 帮写（电商试穿文案）", Category: "应用", OutputType: "text",
+			Description:    "为万物上身的 AI 帮写生成电商试穿画面描述，可在后台编辑角色设定。",
+			Variables:      []PromptTemplateVariable{{Label: "工具", Placeholder: "{{工具}}"}, {Label: "商品", Placeholder: "{{商品}}"}, {Label: "参考方式", Placeholder: "{{参考方式}}"}},
+			DefaultContent: `你是电商试穿场景文案助手。请根据以下信息为 AI 试穿生成一段精炼的中文画面描述（不超过 80 字，只输出描述正文，不要任何解释或前缀）：工具={{工具}}，商品={{商品}}，参考方式={{参考方式}}。描述应包含模特形象、姿态与场景氛围，可直接用于 AI 出图提示词。`,
 		},
 	}
 }

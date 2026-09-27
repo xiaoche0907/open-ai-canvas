@@ -1,0 +1,247 @@
+/* XCstudio 角色造型室 — Character Studio（深色专业工作台 / 点阵预览 / 参数与素材双编辑器） */
+
+.cstudio-workspace {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    background: var(--background);
+    color: var(--foreground);
+}
+
+.cstudio-workspace button { cursor: pointer; }
+.cstudio-workspace button:focus-visible,
+.cstudio-workspace select:focus-visible,
+.cstudio-workspace input:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.cstudio-visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.cstudio-topbar-mark { display: grid; width: 30px; height: 30px; place-items: center; border-radius: var(--r-md); background: var(--workspace-accent-soft); }
+.cstudio-result-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--foreground); }
+
+/* ── 顶部信息条 ─────────────────────────────── */
+.cstudio-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 64px;
+    padding: 0 24px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+.cstudio-topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.cstudio-topbar-title { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.cstudio-topbar-title strong { font-size: 15px; white-space: nowrap; }
+.cstudio-topbar-title .cstudio-copy-badge { margin-left: 2px; color: var(--muted-foreground); font-size: 11px; font-weight: 400; white-space: nowrap; }
+.cstudio-topbar-tags { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.cstudio-topbar-tags span { flex: none; color: var(--muted-foreground); font-size: 11px; white-space: nowrap; }
+.cstudio-topbar-tags span + span::before { content: "·"; margin-right: 6px; }
+.cstudio-back-button { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); color: var(--foreground); font-size: 12px; }
+.cstudio-back-button:hover { background: var(--surface-hover); }
+
+/* ── 通用按钮 ───────────────────────────────── */
+.cstudio-primary-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 38px; padding: 0 18px; border: 1px solid var(--foreground); border-radius: var(--r-md); background: var(--foreground); color: var(--background); font-size: 12px; font-weight: 600; }
+.cstudio-primary-button:hover { opacity: 0.9; }
+.cstudio-ghost-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 38px; padding: 0 18px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); color: var(--foreground); font-size: 12px; font-weight: 600; }
+.cstudio-ghost-button:hover { background: var(--surface-hover); }
+.cstudio-icon-button { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); color: var(--foreground); }
+.cstudio-icon-button:hover { background: var(--surface-hover); }
+
+/* ═══ 视图一：角色库 ═════════════════════════ */
+.cstudio-library { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+
+/* 顶部 Tab */
+.cstudio-lib-tabs { display: flex; gap: 20px; padding: 0 24px; border-bottom: 1px solid var(--border); }
+.cstudio-lib-tabs button { position: relative; display: inline-flex; align-items: center; gap: 5px; min-height: 46px; padding: 0 2px; border: 0; background: transparent; color: var(--muted-foreground); font-size: 13px; }
+.cstudio-lib-tabs button.is-active { color: var(--foreground); font-weight: 700; }
+.cstudio-lib-tabs button.is-active::after { position: absolute; right: 0; bottom: 0; left: 0; height: 2px; background: var(--foreground); content: ""; }
+.cstudio-lib-tabs button span { color: var(--muted-foreground); font-size: 10px; }
+
+/* 筛选行 */
+.cstudio-lib-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 14px 24px 4px; }
+.cstudio-lib-filters { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cstudio-filter-select { min-height: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); color: var(--foreground); font-size: 12px; }
+.cstudio-filter-select:hover { background: var(--surface-hover); }
+.cstudio-lib-search { display: flex; align-items: center; gap: 7px; width: 220px; max-width: 100%; height: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); }
+.cstudio-lib-search input { flex: 1; min-width: 0; height: 100%; border: 0; background: transparent; color: var(--foreground); font-size: 12px; }
+.cstudio-lib-search input::placeholder { color: var(--muted-foreground); }
+.cstudio-lib-search svg { flex: none; color: var(--muted-foreground); }
+.cstudio-lib-toolbar-right { display: flex; align-items: center; gap: 8px; }
+.cstudio-view-switch { display: inline-flex; gap: 3px; padding: 3px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); }
+.cstudio-view-switch button { display: grid; width: 28px; height: 28px; place-items: center; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--muted-foreground); }
+.cstudio-view-switch button.is-active { background: var(--foreground); color: var(--background); }
+
+/* 角色轮播 */
+.cstudio-lib-body { display: flex; align-items: center; justify-content: center; flex: 1; min-height: 0; gap: 18px; padding: 18px 40px 10px; overflow: hidden; }
+.cstudio-carousel-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; flex: 1; min-width: 0; }
+.cstudio-carousel-row { display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%; }
+.cstudio-carousel-name { font-size: 14px; font-weight: 700; }
+.cstudio-carousel-arrow { display: grid; flex: none; width: 40px; height: 40px; place-items: center; border: 1px solid var(--border); border-radius: 50%; background: var(--surface); color: var(--foreground); }
+.cstudio-carousel-arrow:hover { background: var(--surface-hover); border-color: var(--foreground); }
+.cstudio-carousel { display: flex; align-items: center; justify-content: center; flex: 1; min-width: 0; gap: 16px; }
+.cstudio-carousel-card { position: relative; flex: none; width: min(300px, 30vw); overflow: hidden; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); transition: transform 0.3s ease, opacity 0.3s ease, border-color 0.3s ease; }
+.cstudio-carousel-card.is-dim { opacity: 0.45; transform: scale(0.92); }
+.cstudio-carousel-card.is-current { border-color: var(--foreground); box-shadow: 0 18px 44px -14px rgba(0, 0, 0, 0.6); }
+.cstudio-carousel-card img { display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: cover; }
+.cstudio-carousel-card .cstudio-carousel-meta { display: flex; flex-direction: column; gap: 5px; padding: 12px 14px 14px; }
+.cstudio-carousel-card .cstudio-carousel-meta strong { font-size: 13px; }
+.cstudio-carousel-card .cstudio-carousel-meta span { overflow: hidden; color: var(--muted-foreground); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.cstudio-carousel-badge { position: absolute; top: 10px; right: 10px; padding: 3px 8px; border-radius: 999px; background: rgba(0, 0, 0, 0.55); color: #fff; font-size: 10px; backdrop-filter: blur(4px); }
+.cstudio-carousel-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; min-height: 320px; justify-content: center; color: var(--muted-foreground); }
+
+/* 角色库底部操作 */
+.cstudio-lib-footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 24px 22px; border-top: 1px solid var(--border); }
+.cstudio-lib-footer-actions { display: flex; align-items: center; gap: 10px; }
+
+/* ═══ 视图二：角色编辑器 ═══════════════════ */
+.cstudio-editor { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.cstudio-editor-layout { display: grid; grid-template-columns: 150px minmax(0, 1fr) 300px; flex: 1; min-height: 0; }
+
+/* 左侧导航（纯文字窄列表，参考工作台） */
+.cstudio-ed-nav { display: flex; flex-direction: column; gap: 4px; min-height: 0; overflow-y: auto; padding: 16px 10px; background: var(--surface); border-right: 1px solid var(--border); scrollbar-width: none; }
+.cstudio-ed-nav::-webkit-scrollbar { display: none; }
+.cstudio-ed-nav button { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 40px; padding: 0 10px; border: 1px solid transparent; border-radius: var(--r-md); background: transparent; color: var(--muted-foreground); font-size: 12px; font-weight: 600; text-align: left; }
+.cstudio-ed-nav button:hover { background: var(--surface-hover); color: var(--foreground); }
+.cstudio-ed-nav button.is-active { background: var(--bg-secondary); color: var(--foreground); border-color: var(--border); }
+.cstudio-ed-nav .cstudio-free-badge { margin-left: auto; flex: none; padding: 1px 6px; border: 1px solid var(--border); border-radius: var(--r-xs); color: var(--muted-foreground); font-size: 9px; }
+
+/* 中央预览：点阵背景 + 角色视觉中心 */
+.cstudio-preview { position: relative; display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 0; overflow: hidden; background: radial-gradient(circle, rgba(255, 255, 255, 0.07) 1px, transparent 1px) 0 0 / 20px 20px, var(--background); }
+.cstudio-preview img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.25s ease; }
+.cstudio-preview-view-badge { position: absolute; top: 16px; left: 18px; display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--muted-foreground); font-size: 11px; box-shadow: var(--elevation-hairline); }
+.cstudio-preview-zoom-hint { position: absolute; right: 18px; bottom: 16px; display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--muted-foreground); font-size: 11px; }
+.cstudio-preview-zoom-hint button { display: grid; width: 22px; height: 22px; place-items: center; border: 0; background: transparent; color: var(--foreground); }
+.cstudio-preview-dirty-note { position: absolute; bottom: 16px; left: 18px; display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px; border-radius: 999px; background: rgba(245, 158, 11, 0.14); border: 1px solid rgba(245, 158, 11, 0.35); color: #f59e0b; font-size: 11px; }
+.cstudio-preview-dirty-note::before { width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; content: ""; }
+
+/* 右侧编辑器（窄、长列表、独立滚动） */
+.cstudio-inspector { display: flex; flex-direction: column; min-height: 0; background: var(--surface); border-left: 1px solid var(--border); }
+.cstudio-inspector-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 16px 20px; scrollbar-width: none; }
+.cstudio-inspector-scroll::-webkit-scrollbar { display: none; }
+
+/* 二级 Tab（Icon + 名称，选中白字+底部细线） */
+.cstudio-inspector-tabs { display: flex; gap: 2px; padding: 0 16px; border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+.cstudio-inspector-tabs::-webkit-scrollbar { display: none; }
+.cstudio-inspector-tabs button { position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px; border: 0; background: transparent; color: var(--muted-foreground); font-size: 12px; white-space: nowrap; }
+.cstudio-inspector-tabs button svg { flex: none; }
+.cstudio-inspector-tabs button.is-active { color: var(--foreground); font-weight: 700; }
+.cstudio-inspector-tabs button.is-active::after { position: absolute; right: 4px; bottom: 0; left: 4px; height: 2px; background: var(--foreground); content: ""; }
+
+/* 面板区块 */
+.cstudio-panel { display: flex; flex-direction: column; gap: 16px; }
+.cstudio-panel-title { margin: 2px 0 0; font-size: 12px; font-weight: 700; }
+.cstudio-panel-note { margin: -6px 0 0; color: var(--muted-foreground); font-size: 11px; line-height: 1.5; }
+
+/* 参数型：Slider 行 */
+.cstudio-slider-group { display: flex; flex-direction: column; gap: 4px; padding: 10px 0; border-top: 1px solid var(--border); }
+.cstudio-slider-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; padding: 7px 0; }
+.cstudio-slider-row > span { display: flex; align-items: center; gap: 5px; font-size: 12px; }
+.cstudio-slider-row > span svg { color: var(--muted-foreground); }
+.cstudio-slider-row output { min-width: 34px; color: var(--foreground); font-size: 11px; font-variant-numeric: tabular-nums; text-align: right; }
+.cstudio-range { width: 100%; height: 18px; margin: 4px 0 0; background: transparent; accent-color: var(--foreground); cursor: pointer; }
+.cstudio-range::-webkit-slider-runnable-track { height: 3px; border-radius: 2px; background: var(--border); }
+.cstudio-range::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; margin-top: -5.5px; border: 2px solid var(--background); border-radius: 50%; background: var(--foreground); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35); }
+.cstudio-range::-moz-range-track { height: 3px; border-radius: 2px; background: var(--border); }
+.cstudio-range::-moz-range-thumb { width: 12px; height: 12px; border: 2px solid var(--background); border-radius: 50%; background: var(--foreground); }
+
+/* Toggle 行（祛斑祛痘等） */
+.cstudio-toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 0; border-top: 1px solid var(--border); font-size: 12px; }
+.cstudio-switch { position: relative; flex: none; width: 33px; height: 19px; border-radius: 999px; background: var(--border); transition: background 0.18s ease; }
+.cstudio-switch::after { position: absolute; top: 3px; left: 3px; width: 13px; height: 13px; border-radius: 50%; background: var(--surface); content: ""; transition: transform 0.18s ease; }
+.cstudio-toggle-row input { position: absolute; opacity: 0; }
+.cstudio-toggle-row input:checked + .cstudio-switch { background: var(--foreground); }
+.cstudio-toggle-row input:checked + .cstudio-switch::after { transform: translateX(14px); }
+.cstudio-toggle-row input:focus-visible + .cstudio-switch { outline: 2px solid var(--ring); outline-offset: 2px; }
+
+/* Chips（素材分类 / 风格） */
+.cstudio-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.cstudio-chip { display: inline-flex; align-items: center; min-height: 28px; padding: 0 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-secondary); color: var(--muted-foreground); font-size: 11px; transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease; }
+.cstudio-chip:hover { color: var(--foreground); border-color: var(--foreground); }
+.cstudio-chip.is-active { background: var(--foreground); color: var(--background); border-color: var(--foreground); font-weight: 600; }
+
+/* 素材 Grid（Preset 卡片：3 列、缩略图+名称、选中高亮描边） */
+.cstudio-preset-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.cstudio-preset-card { position: relative; display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 5px 5px 8px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); color: var(--foreground); text-align: left; }
+.cstudio-preset-card:hover { border-color: var(--foreground); }
+.cstudio-preset-card.is-selected { outline: 2px solid var(--foreground); outline-offset: 1px; }
+.cstudio-preset-thumb { display: grid; width: 100%; aspect-ratio: 3 / 4; place-items: center; overflow: hidden; border-radius: var(--r-sm); background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--surface-hover) 100%); }
+.cstudio-preset-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.cstudio-preset-card > span { overflow: hidden; padding: 0 3px; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.cstudio-preset-empty { display: grid; min-height: 120px; place-items: center; border: 1px dashed var(--border); border-radius: var(--r-md); color: var(--muted-foreground); font-size: 11px; }
+
+/* 服装大卡（3 列大卡片、浅色背景、完整轮廓） */
+.cstudio-outfit-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.cstudio-outfit-card { display: flex; flex-direction: column; gap: 7px; padding: 7px 7px 9px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); color: var(--foreground); text-align: left; }
+.cstudio-outfit-card:hover { border-color: var(--foreground); }
+.cstudio-outfit-card.is-selected { outline: 2px solid var(--foreground); outline-offset: 1px; }
+.cstudio-outfit-thumb { display: grid; width: 100%; aspect-ratio: 3 / 4; place-items: center; border-radius: var(--r-sm); background: linear-gradient(160deg, #f4f4f5 0%, #e4e4e7 100%); color: #3f3f46; }
+.cstudio-outfit-card > span { overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 发色 Color Swatch */
+.cstudio-swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.cstudio-swatch { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid var(--border); border-radius: 50%; padding: 0; transition: transform 0.15s ease, border-color 0.15s ease; }
+.cstudio-swatch:hover { transform: scale(1.1); border-color: var(--foreground); }
+.cstudio-swatch.is-selected { outline: 2px solid var(--foreground); outline-offset: 2px; }
+.cstudio-swatch.is-custom { background: conic-gradient(#f43f5e, #f59e0b, #10b981, #38bdf8, #8b5cf6, #f43f5e); }
+
+/* 上传占位卡 */
+.cstudio-upload-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; min-height: 96px; border: 1px dashed var(--border); border-radius: var(--r-md); background: transparent; color: var(--muted-foreground); font-size: 11px; transition: border-color 0.18s ease, color 0.18s ease; }
+.cstudio-upload-card:hover { border-color: var(--foreground); color: var(--foreground); }
+
+/* AI 智能造型表单 */
+.cstudio-ai-form { display: flex; flex-direction: column; gap: 10px; }
+.cstudio-ai-form label { display: flex; flex-direction: column; gap: 5px; font-size: 11px; color: var(--muted-foreground); }
+.cstudio-ai-form input,
+.cstudio-ai-form select { min-height: 34px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); color: var(--foreground); font: inherit; font-size: 12px; }
+.cstudio-ai-form textarea { min-height: 64px; resize: vertical; padding: 9px 10px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); color: var(--foreground); font: inherit; font-size: 12px; }
+.cstudio-ai-scheme { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); font-size: 12px; }
+.cstudio-ai-scheme strong { font-size: 12px; }
+.cstudio-ai-scheme span { color: var(--muted-foreground); font-size: 11px; line-height: 1.6; }
+
+/* 音色音调（V1 UI 入口） */
+.cstudio-voice-list { display: flex; flex-direction: column; gap: 2px; }
+.cstudio-voice-list .cstudio-slider-row { border-top: 0; }
+.cstudio-voice-note { padding: 10px 12px; border: 1px dashed var(--border); border-radius: var(--r-md); color: var(--muted-foreground); font-size: 11px; line-height: 1.6; }
+
+/* 底部固定：确认生成（右侧面板底部，非悬浮） */
+.cstudio-generate-bar { display: flex; align-items: center; gap: 10px; margin: 0 16px 16px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); }
+.cstudio-generate-bar > span { color: var(--muted-foreground); font-size: 11px; }
+.cstudio-generate-bar .cstudio-primary-button { margin-left: auto; }
+.cstudio-magic-button { display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 0 14px; border: 1px solid rgba(245, 158, 11, 0.5); border-radius: var(--r-md); background: rgba(245, 158, 11, 0.12); color: #f59e0b; font-size: 12px; font-weight: 600; }
+.cstudio-magic-button:hover { background: rgba(245, 158, 11, 0.2); }
+
+.cstudio-editor-footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 62px; padding: 0 24px; border-top: 1px solid var(--border); background: var(--surface); }
+.cstudio-save-asset-check { display: inline-flex; align-items: center; gap: 9px; color: var(--muted-foreground); font-size: 11px; cursor: pointer; }
+.cstudio-save-asset-check input { position: absolute; opacity: 0; }
+.cstudio-save-asset-check input:checked + .cstudio-switch { background: var(--foreground); }
+.cstudio-save-asset-check input:checked + .cstudio-switch::after { transform: translateX(14px); }
+.cstudio-save-asset-check input:focus-visible + .cstudio-switch { outline: 2px solid var(--ring); outline-offset: 2px; }
+.cstudio-save-asset-check kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: var(--r-xs); background: var(--bg-secondary); color: var(--muted-foreground); font-family: inherit; font-size: 10px; }
+.cstudio-editor-footer-actions { display: flex; align-items: center; gap: 10px; }
+
+/* 发型等紧凑素材卡（3 列小图 + 名称） */
+.cstudio-mini-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.cstudio-mini-card { display: flex; flex-direction: column; gap: 5px; min-width: 0; padding: 4px 4px 7px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); color: var(--foreground); text-align: left; }
+.cstudio-mini-card:hover { border-color: var(--foreground); }
+.cstudio-mini-card.is-selected { outline: 2px solid var(--foreground); outline-offset: 1px; }
+.cstudio-mini-thumb { display: block; width: 100%; aspect-ratio: 1 / 1; border-radius: var(--r-sm); background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--surface-hover) 100%); }
+.cstudio-mini-card > span:last-child { overflow: hidden; padding: 0 3px; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 1100px) {
+    .cstudio-editor-layout { grid-template-columns: 136px minmax(0, 1fr) 280px; }
+    .cstudio-carousel-card { width: min(250px, 32vw); }
+}
+@media (max-width: 800px) {
+    .cstudio-editor-layout { display: flex; flex-direction: column; }
+    .cstudio-ed-nav { flex-direction: row; overflow-x: auto; overflow-y: hidden; padding: 8px 12px; border-right: 0; border-bottom: 1px solid var(--border); }
+    .cstudio-ed-nav button { width: auto; min-height: 38px; white-space: nowrap; }
+    .cstudio-inspector { border-left: 0; border-top: 1px solid var(--border); }
+    .cstudio-lib-body { flex-direction: column; }
+    .cstudio-carousel-card { width: min(220px, 60vw); }
+    .cstudio-lib-footer { flex-direction: column; align-items: stretch; }
+    .cstudio-lib-footer-actions { justify-content: flex-end; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .cstudio-carousel-card { transition: none; }
+    .cstudio-range, .cstudio-switch::after { transition: none; }
+}

@@ -56,6 +56,7 @@ export type CloudAgentChatMessage = {
     meta?: string;
     detail?: unknown;
     attachments?: CloudAgentChatAttachment[];
+    skills?: Array<{ id: string; name: string }>;
     interjection?: "sent" | "undelivered";
 };
 
@@ -327,6 +328,11 @@ export function AgentChatMessage({
                 </span>
             ) : null}
             <div className={`agent-message-body min-w-0 text-sm leading-6 ${isUser ? "agent-message-user max-w-[82%] px-4 py-3 text-right" : "max-w-full flex-1 text-left"}`} style={{ color }}>
+                {isUser && item.skills?.length ? (
+                    <div className="mb-2 flex flex-wrap justify-end gap-1.5">
+                        {item.skills.map((skill) => <span key={skill.id} className="inline-flex max-w-full items-center gap-1 truncate rounded-full border px-2 py-0.5 text-xs" style={{ borderColor: theme.node.stroke, background: theme.node.fill }}><Sparkles className="size-3 shrink-0" />{skill.name}</span>)}
+                    </div>
+                ) : null}
                 {item.interjection ? (
                     <span
                         className="mb-1 inline-flex items-center rounded-full px-1.5 py-[1px] text-[var(--fs-label)] leading-4"
@@ -1032,6 +1038,8 @@ export function AgentChatComposer({
     onSubmit,
     onAddFiles,
     onRemoveAttachment,
+    selectedSkills = [],
+    onRemoveSkill,
     left,
     submitAccessory,
     onStop,
@@ -1053,6 +1061,8 @@ export function AgentChatComposer({
     stopping?: boolean;
     onAddFiles?: (files: FileList | File[] | null) => void | Promise<void>;
     onRemoveAttachment?: (id: string) => void;
+    selectedSkills?: Array<{ id: string; name: string }>;
+    onRemoveSkill?: (id: string) => void;
     left?: ReactNode;
     /** 发送按钮左侧的附属控件，例如上下文用量环。 */
     submitAccessory?: ReactNode;
@@ -1225,6 +1235,17 @@ export function AgentChatComposer({
                                     ) : null}
                                 </div>
                             </div>
+                        ))}
+                    </div>
+                ) : null}
+                {selectedSkills.length ? (
+                    <div className="mb-2 flex flex-wrap gap-1.5" aria-label="当前启用的技能">
+                        {selectedSkills.map((skill) => (
+                            <span key={skill.id} className="group/skill inline-flex max-w-full items-center gap-1 rounded-full border px-2 py-0.5 text-xs" style={{ borderColor: theme.node.stroke, background: theme.node.fill, color: theme.node.text }}>
+                                <Sparkles className="size-3 shrink-0" aria-hidden="true" />
+                                <span className="min-w-0 truncate">{skill.name}</span>
+                                {onRemoveSkill ? <button type="button" className="grid size-4 shrink-0 place-items-center rounded-full opacity-60 hover:opacity-100 focus-visible:outline focus-visible:outline-2" aria-label={`移除技能 ${skill.name}`} onClick={() => onRemoveSkill(skill.id)}><X className="size-3" /></button> : null}
+                            </span>
                         ))}
                     </div>
                 ) : null}

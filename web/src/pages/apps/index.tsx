@@ -4,16 +4,27 @@ import { Button, Tag } from "antd";
 import { AppModal } from "@/components/ui/product/app-modal";
 import { ImageGeneratorWorkspace } from "./image-generator";
 import { UniversalTryonWorkspace } from "./universal-tryon";
+import { CharacterStudioWorkspace } from "./character-studio";
 import {
     Search,
-    ChevronDown,
-    Eye,
-    Sparkles,
     Wand2,
     ArrowRight,
     Copy,
     Check,
-    Boxes
+    Boxes,
+    Image,
+    Shirt,
+    Scissors,
+    ImageUp,
+    Clapperboard,
+    ImagePlus,
+    Store,
+    Sofa,
+    Camera,
+    Palette,
+    LayoutTemplate,
+    UserRound,
+    type LucideIcon
 } from "lucide-react";
 
 import { WorkspacePage } from "@/components/layout/workspace-page";
@@ -27,7 +38,7 @@ interface CategoryOption {
 }
 
 const CATEGORIES: CategoryOption[] = [
-    { key: "all", label: "全品类" },
+    { key: "all", label: "全部" },
     { key: "fashion", label: "服装/模特/首饰" },
     { key: "video", label: "视频专区" },
     { key: "architecture", label: "建筑/室内设计" },
@@ -39,8 +50,8 @@ interface ToolItem {
     id: string;
     sectionId: "main-visual" | "viral-replica" | "style-replica";
     title: string;
-    bannerPrefix: string;
-    bannerHighlight: string;
+    icon: LucideIcon;
+    iconBg: string;
     desc: string;
     tag: string;
     categories: CategoryKey[];
@@ -54,8 +65,8 @@ const ALL_TOOLS: ToolItem[] = [
         id: "image-gen",
         sectionId: "main-visual",
         title: "图像生成",
-        bannerPrefix: "图像",
-        bannerHighlight: "生成",
+        icon: Image,
+        iconBg: "linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)",
         desc: "融合多张参考素材，快速构建完整商业画面。",
         tag: "电商商业图",
         categories: ["fashion", "architecture", "food", "lifestyle"],
@@ -65,19 +76,30 @@ const ALL_TOOLS: ToolItem[] = [
         id: "universal-tryon",
         sectionId: "main-visual",
         title: "AI 万物上身",
-        bannerPrefix: "万物",
-        bannerHighlight: "上身",
+        icon: Shirt,
+        iconBg: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
         desc: "模特换装、人台试穿、鞋靴上脚，Agent 全流程自然拟合交付高清大图。",
         tag: "虚拟试衣",
         categories: ["fashion"],
         promptHint: "高级时装模特，服装自然褶皱与垂坠感，专业影棚柔光，4K高清质感",
     },
     {
+        id: "character-studio",
+        sectionId: "main-visual",
+        title: "角色造型室",
+        icon: UserRound,
+        iconBg: "linear-gradient(135deg, #fcd34d 0%, #d97706 100%)",
+        desc: "创建、编辑并保存可持续复用的虚拟角色资产：脸部精修、身材塑形、发型妆容与服装造型。",
+        tag: "角色资产",
+        categories: ["fashion"],
+        promptHint: "",
+    },
+    {
         id: "partial-replace",
         sectionId: "main-visual",
         title: "局部替换",
-        bannerPrefix: "局部",
-        bannerHighlight: "替换",
+        icon: Scissors,
+        iconBg: "linear-gradient(135deg, #f43f5e 0%, #be123c 100%)",
         desc: "精确圈选局部区域，按指令完成自然替换。",
         tag: "智能修图",
         categories: ["fashion", "lifestyle"],
@@ -89,8 +111,8 @@ const ALL_TOOLS: ToolItem[] = [
         id: "white-background",
         sectionId: "viral-replica",
         title: "通用白底图精修",
-        bannerPrefix: "通用",
-        bannerHighlight: "白底图精修",
+        icon: ImageUp,
+        iconBg: "linear-gradient(135deg, #14b8a6 0%, #0f766e 100%)",
         desc: "面向八大商品品类，批量生成专业白底精修图。",
         tag: "电商合规",
         categories: ["lifestyle", "fashion", "food"],
@@ -100,8 +122,8 @@ const ALL_TOOLS: ToolItem[] = [
         id: "product-video",
         sectionId: "viral-replica",
         title: "AI生成产品视频",
-        bannerPrefix: "AI生成",
-        bannerHighlight: "产品视频",
+        icon: Clapperboard,
+        iconBg: "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)",
         desc: "从产品素材到分镜方案，批量生成商业展示视频。",
         tag: "动态带货",
         categories: ["video"],
@@ -111,8 +133,8 @@ const ALL_TOOLS: ToolItem[] = [
         id: "main-image",
         sectionId: "viral-replica",
         title: "主图生成",
-        bannerPrefix: "主图",
-        bannerHighlight: "生成",
+        icon: ImagePlus,
+        iconBg: "linear-gradient(135deg, #fb7185 0%, #e11d48 100%)",
         desc: "面向电商平台，生成清晰聚焦的高转化主图。",
         tag: "点击率提升",
         categories: ["fashion", "food", "lifestyle"],
@@ -122,8 +144,8 @@ const ALL_TOOLS: ToolItem[] = [
         id: "ecommerce-main",
         sectionId: "viral-replica",
         title: "生成电商主图",
-        bannerPrefix: "生成",
-        bannerHighlight: "电商主图",
+        icon: Store,
+        iconBg: "linear-gradient(135deg, #6366f1 0%, #4338ca 100%)",
         desc: "融合产品信息、目标平台与多语言文案，生成高转化电商视觉。",
         tag: "全案排版",
         categories: ["lifestyle", "fashion"],
@@ -133,8 +155,8 @@ const ALL_TOOLS: ToolItem[] = [
         id: "scene-gen",
         sectionId: "viral-replica",
         title: "场景图生成",
-        bannerPrefix: "场景",
-        bannerHighlight: "图生成",
+        icon: Sofa,
+        iconBg: "linear-gradient(135deg, #34d399 0%, #059669 100%)",
         desc: "将产品自然放入匹配卖点的商业生活场景。",
         tag: "居家空间",
         categories: ["architecture", "lifestyle", "food"],
@@ -144,8 +166,8 @@ const ALL_TOOLS: ToolItem[] = [
         id: "photo-lab",
         sectionId: "viral-replica",
         title: "摄影实验室",
-        bannerPrefix: "摄影",
-        bannerHighlight: "实验室",
+        icon: Camera,
+        iconBg: "linear-gradient(135deg, #64748b 0%, #334155 100%)",
         desc: "组合相机、镜头与胶片预设，批量生成统一摄影语言的商业成片。",
         tag: "大师预设",
         categories: ["fashion", "architecture"],
@@ -157,8 +179,8 @@ const ALL_TOOLS: ToolItem[] = [
         id: "style-transfer",
         sectionId: "style-replica",
         title: "风格复刻",
-        bannerPrefix: "风格",
-        bannerHighlight: "复刻",
+        icon: Palette,
+        iconBg: "linear-gradient(135deg, #ec4899 0%, #db2777 100%)",
         desc: "提取对标爆款的色调、质感与光影，快速迁移到新品素材。",
         tag: "色调对齐",
         categories: ["lifestyle", "food", "fashion"],
@@ -168,8 +190,8 @@ const ALL_TOOLS: ToolItem[] = [
         id: "layout-transfer",
         sectionId: "style-replica",
         title: "排版与构图复刻",
-        bannerPrefix: "排版",
-        bannerHighlight: "复刻",
+        icon: LayoutTemplate,
+        iconBg: "linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)",
         desc: "拆解电商爆款海报版式结构，自动适配不同平台主图画幅。",
         tag: "视觉重组",
         categories: ["fashion", "lifestyle"],
@@ -225,36 +247,36 @@ function AiAppsCatalog({ onOpenApp }: { onOpenApp: (appId: string) => void }) {
     return (
         <WorkspacePage fluid scroll className="ai-apps-page-root">
             <div className="ai-apps-container">
-                {/* 顶部搜索与品类筛选 */}
-                <div className="ai-apps-toolbar">
-                    <div className="ai-apps-search-row">
-                        <div className="ai-apps-type-trigger">
-                            <span>智能体</span>
-                            <ChevronDown className="size-3.5 opacity-60" />
-                        </div>
-                        <div className="ai-apps-search-input">
-                            <Search className="ai-apps-search-icon" />
-                            <input
-                                type="text"
-                                placeholder="输入模板关键词或功能名称，按 Enter 搜索"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                    {/* 品类药丸筛选 */}
-                    <div className="ai-apps-pills">
+                {/* 顶部：页面标题 + 分类标签 + 搜索 */}
+                <div className="ai-apps-head">
+                    <h1 className="ai-apps-head-title">全部应用</h1>
+                </div>
+                <div className="ai-apps-nav-row">
+                    {/* 分类标签（tab 形态） */}
+                    <div className="ai-apps-tabs" role="tablist" aria-label="应用分类">
                         {CATEGORIES.map((cat) => (
                             <button
                                 key={cat.key}
                                 type="button"
-                                className={`ai-apps-pill-btn ${selectedCategory === cat.key ? "is-active" : ""}`}
+                                role="tab"
+                                aria-selected={selectedCategory === cat.key}
+                                className={`ai-apps-tab ${selectedCategory === cat.key ? "is-active" : ""}`}
                                 onClick={() => setSelectedCategory(cat.key)}
                             >
                                 {cat.label}
                             </button>
                         ))}
+                    </div>
+
+                    {/* 搜索框（右对齐） */}
+                    <div className="ai-apps-search-row">
+                        <Search className="ai-apps-search-icon" />
+                        <input
+                            type="text"
+                            placeholder="搜索应用或用例"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
                     </div>
                 </div>
 
@@ -274,63 +296,35 @@ function AiAppsCatalog({ onOpenApp }: { onOpenApp: (appId: string) => void }) {
                                 {sectionTools.map((tool) => (
                                     <div
                                         key={tool.id}
-                                        className="ai-app-card group"
+                                        className="ai-app-card"
+                                        role="button"
+                                        tabIndex={0}
                                         onClick={() => {
-                                            if (tool.id === "image-gen" || tool.id === "universal-tryon") {
+                                            if (tool.id === "image-gen" || tool.id === "universal-tryon" || tool.id === "character-studio") {
                                                 onOpenApp(tool.id);
                                             } else {
                                                 setActiveTool(tool);
                                             }
                                         }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter" || e.key === " ") {
+                                                e.preventDefault();
+                                                if (tool.id === "image-gen" || tool.id === "universal-tryon" || tool.id === "character-studio") {
+                                                    onOpenApp(tool.id);
+                                                } else {
+                                                    setActiveTool(tool);
+                                                }
+                                            }
+                                        }}
                                     >
-                                        {/* 卡片顶部视觉 Banner */}
-                                        <div className="ai-app-card-banner">
-                                            <div className="ai-app-card-banner-title">
-                                                <span>{tool.bannerPrefix}</span>
-                                                <span className="ai-app-card-banner-highlight">{tool.bannerHighlight}</span>
+                                        <div className="ai-app-card-title-row">
+                                            <div className="ai-app-card-icon" style={{ background: tool.iconBg }} aria-hidden>
+                                                <tool.icon className="size-[18px]" strokeWidth={2.2} />
                                             </div>
-
-                                            {/* 流程图示示意 */}
-                                            <div className="ai-app-card-diagram">
-                                                <div className="ai-app-diagram-thumb">
-                                                    <div className="w-4 h-5 rounded-[2px] bg-foreground/20 border border-foreground/15" />
-                                                </div>
-                                                <div className="ai-app-diagram-arrow">➔</div>
-                                                <div className="ai-app-diagram-result">
-                                                    <Sparkles className="size-3 text-amber-500" />
-                                                </div>
-                                            </div>
-
-                                            {/* 快速查看浮动按钮 */}
-                                            <button
-                                                type="button"
-                                                className="ai-app-card-eye-btn"
-                                                aria-label="查看详情"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    if (tool.id === "image-gen" || tool.id === "universal-tryon") {
-                                                        onOpenApp(tool.id);
-                                                    } else {
-                                                        setActiveTool(tool);
-                                                    }
-                                                }}
-                                            >
-                                                <Eye className="size-3.5" />
-                                            </button>
+                                            <span className="ai-app-card-title">{tool.title}</span>
+                                            <ArrowRight className="ai-app-card-arrow" />
                                         </div>
-
-                                        {/* 卡片内容区域 */}
-                                        <div className="ai-app-card-body">
-                                            <div className="ai-app-card-title">{tool.title}</div>
-                                            <p className="ai-app-card-desc">{tool.desc}</p>
-                                            <div className="ai-app-card-footer">
-                                                <span className="ai-app-card-tag">{tool.tag}</span>
-                                                <span className="ai-app-card-action-hint">
-                                                    <span>立即使用</span>
-                                                    <ArrowRight className="size-3" />
-                                                </span>
-                                            </div>
-                                        </div>
+                                        <p className="ai-app-card-desc">{tool.desc}</p>
                                     </div>
                                 ))}
                             </div>
@@ -444,6 +438,14 @@ export default function AiAppsPage() {
 
     if (currentApp === "universal-tryon") {
         return <UniversalTryonWorkspace onBack={() => {
+            const next = new URLSearchParams(searchParams);
+            next.delete("app");
+            setSearchParams(next);
+        }} />;
+    }
+
+    if (currentApp === "character-studio") {
+        return <CharacterStudioWorkspace onBack={() => {
             const next = new URLSearchParams(searchParams);
             next.delete("app");
             setSearchParams(next);

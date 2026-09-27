@@ -1,5 +1,5 @@
 import { Popover } from "antd";
-import { Bell, ChevronDown, ChevronRight, CircleUserRound, History as HistoryIcon, Infinity as InfinityIcon, LayoutGrid, Newspaper, PanelLeftClose, PanelLeftOpen, Plus } from "lucide-react";
+import { Bell, ChevronDown, ChevronRight, CircleUserRound, History as HistoryIcon, Infinity as InfinityIcon, LayoutGrid, Newspaper, Palette, PanelLeftClose, PanelLeftOpen, Plus } from "lucide-react";
 import { LayoutGroup, motion, useReducedMotion } from "motion/react";
 import { useEffect, useMemo, useRef, useState, type ComponentType, type CSSProperties } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
@@ -46,6 +46,7 @@ function buildNav(features: FeatureAvailability, isAdmin: boolean): { groups: Wo
             items: [
                 { ...toolItem("create", "/"), id: "home", title: "创作" },
                 { ...toolItem("projects", "/projects"), title: "短剧 Agent" },
+                { id: "ai-brand", title: "AI品牌", icon: Palette, to: "/skill-explore" },
                 { ...toolItem("canvas", "/canvas"), title: "自由画布" },
                 { id: "apps", title: "AI应用", icon: LayoutGrid, to: "/apps" },
                 { id: "ai-news", title: "AI资讯", icon: Newspaper, to: "/ai-news" },
@@ -156,7 +157,7 @@ function NavItem({
     const Icon = item.icon;
     const rowStyle = collapsed ? undefined : ({ paddingLeft: `${level * 12 + 10}px` } as CSSProperties);
 
-    const collapsedTitle = item.id === "home" ? "创作" : item.id === "projects" ? "短剧" : item.id === "canvas" ? "画布" : item.id === "apps" ? "应用" : item.id === "ai-news" ? "资讯" : item.id === "assets" ? "资产" : item.id === "skills" ? "技能" : item.id === "plugins" ? "插件" : item.id === "tasks" ? "历史" : item.title.slice(0, 2);
+    const collapsedTitle = item.id === "home" ? "创作" : item.id === "projects" ? "短剧" : item.id === "canvas" ? "画布" : item.id === "apps" ? "应用" : item.id === "ai-news" ? "资讯" : item.id === "ai-brand" ? "品牌" : item.id === "assets" ? "资产" : item.id === "skills" ? "技能" : item.id === "plugins" ? "插件" : item.id === "tasks" ? "历史" : item.title.slice(0, 2);
     const rowContent = (
         <>
             <span className="app-workspace-nav-main flex min-w-0 items-center gap-2.5">
@@ -296,7 +297,7 @@ export function WorkspaceSidebarNav({ collapsed, onNavigate, onOpenSearch, onExp
 
     const slug = pathname.split("/").filter(Boolean)[0] || "home";
     const section = searchParams.get("section");
-    const activeId = slug === "settings" && section ? `settings:${section}` : slug;
+    const activeId = slug === "skill-explore" ? "ai-brand" : slug === "settings" && section ? `settings:${section}` : slug;
 
     const scrollRef = useRef<HTMLDivElement>(null);
     const [scrollState, setScrollState] = useState({ hasTopFade: false, hasBottomFade: false });

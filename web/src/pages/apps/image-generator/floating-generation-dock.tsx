@@ -3,6 +3,7 @@ import { Button, Image, Spin } from "antd";
 import {
     Plus,
     X,
+    FolderOpen,
     Image as ImageIcon,
     Bot,
     ArrowRight,
@@ -37,6 +38,7 @@ interface FloatingGenerationDockProps {
     mode?: "image" | "agent";
     agentPreparing?: boolean;
     onChangeMode?: (mode: "image" | "agent") => void;
+    onImportFromAssets?: () => void;
 }
 
 export function FloatingGenerationDock({
@@ -58,6 +60,7 @@ export function FloatingGenerationDock({
     mode = "image",
     agentPreparing = false,
     onChangeMode,
+    onImportFromAssets,
 }: FloatingGenerationDockProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -124,6 +127,7 @@ export function FloatingGenerationDock({
                         style={{ display: "none" }}
                         onChange={handleFileChange}
                     />
+                    <div className="image-gen-ref-zone">
                     <div
                         className="image-gen-ref-picker"
                         title={canAddReference ? `点击或拖拽上传参考图，最多 ${MAX_REFERENCE_IMAGES} 张` : `已达到 ${MAX_REFERENCE_IMAGES} 张上限`}
@@ -181,6 +185,19 @@ export function FloatingGenerationDock({
                         {referenceImages.length > 0 && (
                             <span className="image-gen-ref-count">{referenceImages.length}/{MAX_REFERENCE_IMAGES}</span>
                         )}
+                    </div>
+                    {canAddReference && (
+                        <button
+                            type="button"
+                            className="image-gen-ref-import"
+                            onClick={onImportFromAssets}
+                            aria-label="从资产库导入参考图"
+                            title="从资产库导入参考图"
+                        >
+                            <FolderOpen className="size-3.5" />
+                            <span>从资产导入</span>
+                        </button>
+                    )}
                     </div>
 
                     {/* 提示词输入框 */}

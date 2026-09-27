@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type ReactNode } from "react";
+import { useRef, useState, type ChangeEvent, type CSSProperties, type ReactNode } from "react";
 import { Dropdown, Slider } from "antd";
 import { AssetLibraryCard } from "@/components/assets/asset-library-card";
 import { AppModal } from "@/components/ui/product/app-modal";
@@ -9,17 +9,18 @@ import {
     Sparkles,
     ZoomIn,
     ZoomOut,
-    Download,
     Eye,
     Check,
     Palette,
+    Upload,
+    FolderOpen,
     Layers,
     Filter,
     ChevronDown,
     Bot,
+    Trash2,
     Image as ImageIcon,
 } from "lucide-react";
-import { downloadMediaFile } from "@/lib/media-download";
 import { ImageGenProjectSidebar } from "./project-sidebar";
 import type { GeneratedImageItem, ImageGenProject } from "./types";
 
@@ -48,6 +49,10 @@ interface CanvasWorkspaceViewProps {
     generationStage?: string;
     generationRatio?: string;
     onSendToCanvas: (item: GeneratedImageItem) => void;
+    onSendToAgent: (item: GeneratedImageItem) => void;
+    onDeleteResult: (item: GeneratedImageItem) => void;
+    onUploadReference?: (files: File[]) => void;
+    onImportFromAssets?: () => void;
     generationMode: "image" | "agent";
     agentPreparing?: boolean;
     onChangeGenerationMode: (mode: "image" | "agent") => void;
@@ -73,6 +78,10 @@ export function CanvasWorkspaceView({
     generationStage = "正在深度构图并生成商业级画面...",
     generationRatio = "1:1",
     onSendToCanvas,
+    onSendToAgent,
+    onDeleteResult,
+    onUploadReference,
+    onImportFromAssets,
     generationMode,
     agentPreparing = false,
     onChangeGenerationMode,
@@ -82,16 +91,18 @@ export function CanvasWorkspaceView({
     const [category, setCategory] = useState<"all" | "image">("all");
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const agentRefInputRef = useRef<HTMLInputElement>(null);
+
+    const handleAgentRefFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length) onUploadReference?.(files);
+        if (agentRefInputRef.current) agentRefInputRef.current.value = "";
+    };
     const ratioMatch = generationRatio.match(/^(\d+(?:\.\d+)?)\s*[:x/]\s*(\d+(?:\.\d+)?)$/i);
     const loadingAspectRatio = ratioMatch ? `${ratioMatch[1]} / ${ratioMatch[2]}` : "1 / 1";
     const galleryStyle = {
         "--image-gen-card-width": `${Math.round(280 * zoom / 100)}px`,
     } as CSSProperties;
-
-    const handleDownload = (img: GeneratedImageItem) => {
-        const safeTitle = (title.trim() || "ai-image-gen").replace(/[\\/:*?"<>|]/g, "_");
-        void downloadMediaFile(img.url, `${safeTitle}.png`);
-    };
 
     return (
         <div className="image-gen-workspace-root">
@@ -171,6 +182,38 @@ export function CanvasWorkspaceView({
                             <span>{agentPreparing ? "正在进入" : "Agent"}</span>
                         </button>
                     </div>
+
+                    {/* Agent 模式：上传/导入参考图给 Agent 使用 */}
+                    <input
+                        ref={agentRefInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        style={{ display: "none" }}
+                        onChange={handleAgentRefFileChange}
+                    />
+                    {generationMode === "agent" && (
+                        <>
+                            <button
+                                type="button"
+                                className="image-gen-pill-btn"
+                                onClick={() => agentRefInputRef.current?.click()}
+                                title="上传参考图给 Agent"
+                            >
+                                <Upload className="size-3.5" />
+                                <span>上传参考图</span>
+                            </button>
+                            <button
+                                type="button"
+                                className="image-gen-pill-btn"
+                                onClick={onImportFromAssets}
+                                title="从资产库选择参考图加入项目"
+                            >
+                                <FolderOpen className="size-3.5" />
+                                <span>从资产导入</span>
+                            </button>
+                        </>
+                    )}
                 </div>
 
                 <div className="image-gen-topbar-right">
@@ -242,12 +285,25 @@ export function CanvasWorkspaceView({
                                         <span>生成结果</span>
                                     </div>
 
+                                    <button
+                                        type="button"
+                                        className="image-gen-result-delete"
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            onDeleteResult(item);
+                                        }}
+                                        title="删除该生成结果"
+                                        aria-label="删除该生成结果"
+                                    >
+                                        <Trash2 className="size-4" />
+                                    </button>
+
                                     <div className="image-gen-card-actions-bar">
                                         <button type="button" className="image-gen-action-btn" onClick={() => setPreviewUrl(item.url)} title="放大查看高清原图" aria-label="放大查看高清原图">
                                             <Eye className="size-4" />
                                         </button>
-                                        <button type="button" className="image-gen-action-btn" onClick={() => handleDownload(item)} title="无损下载至本地" aria-label="无损下载至本地">
-                                            <Download className="size-4" />
+                                        <button type="button" className="image-gen-action-btn" onClick={() => onSendToAgent(item)} title="发送给 Agent 创作" aria-label="发送给 Agent 创作">
+                                            <Bot className="size-4" />
                                         </button>
                                         <button type="button" className="image-gen-action-btn" onClick={() => onSendToCanvas(item)} title="发送到自由画布" aria-label="发送到自由画布">
                                             <Palette className="size-4" />

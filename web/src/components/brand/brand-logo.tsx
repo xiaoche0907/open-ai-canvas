@@ -15,22 +15,19 @@ type BrandLogoProps = {
 export function BrandLogo({ className, fallback, alt = "", theme = "auto" }: BrandLogoProps) {
     const appearance = useAppearanceStore((state) => state.appearance);
     const currentTheme = useActiveTheme();
-    const source = appearanceLogoURL(appearance, theme === "auto" ? currentTheme : theme);
-    const [failedSource, setFailedSource] = useState<string | null>(null);
-    if (!appearance.logoConfigured) return <>{fallback}</>;
-    // A configured custom logo must never fall through to the built-in brand
-    // when its file becomes unavailable. Keep its footprint neutral instead.
-    if (failedSource === source) return <span className={cn("block", className)} aria-hidden="true" />;
+    const resolvedTheme = theme === "auto" ? currentTheme : theme;
+    const builtInSource = resolvedTheme === "dark" ? "/brand/jingche-dark.png" : "/brand/jingche-light.png";
+    const source = appearance.logoConfigured ? appearanceLogoURL(appearance, resolvedTheme) : builtInSource;
+    const [failedSources, setFailedSources] = useState<string[]>([]);
+    const displaySource = failedSources.includes(source) ? builtInSource : source;
+    if (failedSources.includes(displaySource)) return <>{fallback}</>;
     return (
         <img
-            src={source}
+            src={displaySource}
             alt={alt}
             className={cn("block object-contain", className)}
             draggable={false}
-            onError={(event) => {
-                event.currentTarget.style.visibility = "hidden";
-                setFailedSource(source);
-            }}
+            onError={() => setFailedSources((current) => current.includes(displaySource) ? current : [...current, displaySource])}
         />
     );
 }

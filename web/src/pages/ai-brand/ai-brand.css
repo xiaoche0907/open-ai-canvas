@@ -1,0 +1,91 @@
+.ai-brand-page-root { min-height: 100%; }
+.ai-brand-container { width: min(100%, 1240px); margin: 0 auto; padding: 36px 42px 80px; }
+
+/* ===== Hero ===== */
+.ai-brand-hero { position: relative; overflow: hidden; padding: 40px 44px 34px; border: 1px solid var(--border); border-radius: var(--r-xl, 20px); background: linear-gradient(180deg, var(--bg-secondary), var(--surface)); text-align: center; }
+.ai-brand-hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(560px 220px at 88% -10%, color-mix(in srgb, var(--workspace-accent-soft) 60%, transparent), transparent 70%); pointer-events: none; }
+.ai-brand-eyebrow { margin: 0 0 10px; color: var(--muted-foreground); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; }
+.ai-brand-title { margin: 0; font-size: clamp(30px, 4.2vw, 46px); font-weight: 800; letter-spacing: -0.035em; line-height: 1.08; }
+.ai-brand-subtitle { max-width: 600px; margin: 10px auto 0; color: var(--muted-foreground); font-size: 14px; line-height: 1.6; }
+
+
+.ai-brand-agent { display: flex; align-items: center; gap: 10px; max-width: 720px; min-height: 52px; margin: 24px auto 0; padding: 7px 7px 7px 10px; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--elevation-card); transition: border-color .18s ease, box-shadow .18s ease; }
+.ai-brand-agent:focus-within { border-color: color-mix(in srgb, var(--foreground) 45%, var(--border)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--foreground) 8%, transparent); }
+.ai-brand-agent-add { display: grid; width: 34px; height: 34px; flex: none; place-items: center; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--bg-secondary); color: var(--muted-foreground); cursor: pointer; transition: background .18s ease, color .18s ease, border-color .18s ease; }
+.ai-brand-agent-add:hover { color: var(--foreground); border-color: color-mix(in srgb, var(--foreground) 30%, var(--border)); }
+.ai-brand-agent textarea { flex: 1; min-width: 0; max-height: 132px; padding: 5px 2px; border: 0; background: transparent; color: var(--foreground); font: inherit; font-size: 14px; line-height: 1.5; resize: none; outline: none; overflow-y: auto; }
+.ai-brand-agent textarea::placeholder { color: var(--muted-foreground); }
+.ai-brand-agent-actions { display: flex; flex: none; align-items: center; gap: 8px; }
+.ai-brand-agent-ghost { display: grid; width: 34px; height: 34px; place-items: center; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--muted-foreground); cursor: pointer; transition: background .18s ease, color .18s ease; }
+.ai-brand-agent-ghost:hover { background: var(--bg-secondary); color: var(--foreground); }
+.ai-brand-agent-send { display: grid; width: 36px; height: 36px; place-items: center; border: 0; border-radius: var(--r-sm); background: var(--foreground); color: var(--background); cursor: pointer; transition: opacity .18s ease, transform .18s ease; }
+.ai-brand-agent-send:hover { opacity: .88; transform: scale(1.03); }
+.ai-brand-agent-add:focus-visible, .ai-brand-agent-ghost:focus-visible, .ai-brand-agent-send:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.ai-brand-agent-hint { margin: 10px auto 0; color: var(--muted-foreground); font-size: 12px; text-align: center; }
+
+.ai-brand-agent-helps { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 16px; }
+.ai-brand-help-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+.ai-brand-help-label { flex: none; color: var(--muted-foreground); font-size: 12px; }
+.ai-brand-help-row button { display: inline-flex; align-items: center; min-height: 30px; padding: 0 13px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--foreground); font-size: 12px; cursor: pointer; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
+.ai-brand-help-row button:hover { background: var(--bg-secondary); border-color: color-mix(in srgb, var(--foreground) 30%, var(--border)); transform: translateY(-1px); }
+.ai-brand-help-row button:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+
+/* ===== 分类标签 ===== */
+.ai-brand-tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; width: fit-content; max-width: 100%; margin: 28px auto 18px; padding: 3px; border-radius: var(--r-md); background: var(--bg-secondary); }
+.ai-brand-tabs button { display: inline-flex; align-items: center; min-height: 36px; padding: 0 16px; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--muted-foreground); font-size: 12px; font-weight: 600; cursor: pointer; transition: background .18s ease, color .18s ease; }
+.ai-brand-tabs button:hover { color: var(--foreground); }
+.ai-brand-tabs button.is-active { background: var(--surface); color: var(--foreground); box-shadow: var(--elevation-hairline); font-weight: 700; }
+.ai-brand-tabs button:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+
+/* ===== 技能卡片 ===== */
+.ai-brand-works { display: grid; grid-template-columns: 252px minmax(0, 1fr); gap: 18px; align-items: start; }
+.ai-brand-campaign { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; min-height: 340px; padding: 24px; border: 1px solid var(--border); border-radius: var(--r-lg); background: linear-gradient(170deg, color-mix(in srgb, var(--workspace-accent-soft) 70%, var(--surface)), var(--surface)); box-shadow: var(--elevation-hairline); cursor: pointer; overflow: hidden; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; text-align: left; }
+.ai-brand-campaign:hover { transform: translateY(-3px); box-shadow: var(--elevation-card); border-color: color-mix(in srgb, var(--foreground) 24%, var(--border)); }
+.ai-brand-campaign::after { content: ""; position: absolute; right: -42px; bottom: -52px; width: 170px; height: 170px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--foreground) 10%, transparent), transparent 70%); pointer-events: none; }
+.ai-brand-campaign-eyebrow { color: var(--muted-foreground); font-size: 10px; font-weight: 700; letter-spacing: 0.16em; }
+.ai-brand-campaign-title { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.25; }
+.ai-brand-campaign-desc { margin: 0; color: var(--muted-foreground); font-size: 12.5px; line-height: 1.65; }
+.ai-brand-campaign-go { display: inline-flex; align-items: center; gap: 6px; margin-top: auto; padding: 8px 13px; border-radius: var(--r-sm); background: var(--foreground); color: var(--background); font-size: 12px; font-weight: 700; cursor: pointer; transition: opacity .18s ease, transform .18s ease; }
+.ai-brand-campaign-go:hover { opacity: .9; transform: translateX(2px); }
+.ai-brand-campaign:focus-visible, .ai-brand-campaign-go:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.ai-brand-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(272px, 1fr)); gap: 16px; }
+.ai-brand-skill-card { display: flex; flex-direction: column; gap: 12px; padding: 0; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--elevation-hairline); text-align: left; overflow: hidden; cursor: pointer; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.ai-brand-skill-card:hover { transform: translateY(-3px); box-shadow: var(--elevation-card); border-color: color-mix(in srgb, var(--foreground) 26%, var(--border)); }
+.ai-brand-skill-card:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+
+.ai-brand-skill-thumb { position: relative; display: flex; align-items: center; justify-content: center; height: 152px; border-bottom: 1px solid var(--border); }
+.ai-brand-skill-thumb.tone-violet { background: linear-gradient(140deg, color-mix(in srgb, #8B5CF6 26%, var(--surface)), color-mix(in srgb, #8B5CF6 8%, var(--surface))); }
+.ai-brand-skill-thumb.tone-pink { background: linear-gradient(140deg, color-mix(in srgb, #EC4899 26%, var(--surface)), color-mix(in srgb, #EC4899 8%, var(--surface))); }
+.ai-brand-skill-thumb.tone-cyan { background: linear-gradient(140deg, color-mix(in srgb, #06B6D4 24%, var(--surface)), color-mix(in srgb, #06B6D4 8%, var(--surface))); }
+.ai-brand-skill-thumb.tone-amber { background: linear-gradient(140deg, color-mix(in srgb, #F59E0B 24%, var(--surface)), color-mix(in srgb, #F59E0B 8%, var(--surface))); }
+.ai-brand-skill-thumb.tone-emerald { background: linear-gradient(140deg, color-mix(in srgb, #10B981 24%, var(--surface)), color-mix(in srgb, #10B981 8%, var(--surface))); }
+.ai-brand-skill-icon { display: grid; width: 64px; height: 64px; place-items: center; border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent); border-radius: var(--r-lg); background: color-mix(in srgb, var(--surface) 88%, transparent); color: var(--foreground); box-shadow: var(--elevation-card); transition: transform .18s ease; }
+.ai-brand-skill-card:hover .ai-brand-skill-icon { transform: translateY(-2px) scale(1.04); }
+.ai-brand-skill-tag { position: absolute; top: 10px; left: 10px; padding: 3px 9px; border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent); border-radius: 999px; background: color-mix(in srgb, var(--surface) 82%, transparent); color: var(--muted-foreground); font-size: 10px; font-weight: 600; letter-spacing: 0.02em; backdrop-filter: blur(4px); }
+
+.ai-brand-skill-body { display: flex; flex-direction: column; gap: 5px; padding: 2px 14px 14px; }
+.ai-brand-skill-body strong { font-size: 13.5px; font-weight: 700; letter-spacing: -0.01em; }
+.ai-brand-skill-body > span { color: var(--muted-foreground); font-size: 12px; line-height: 1.55; }
+
+/* ===== 响应式 ===== */
+@media (max-width: 800px) {
+    .ai-brand-container { padding: 28px 18px 60px; }
+    .ai-brand-hero { padding: 30px 24px 26px; }
+    .ai-brand-agent { min-height: 50px; padding-block: 8px; }
+    .ai-brand-works { grid-template-columns: 1fr; }
+    .ai-brand-campaign { min-height: auto; }
+    .ai-brand-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+}
+@media (max-width: 480px) {
+    .ai-brand-grid { grid-template-columns: 1fr; }
+    .ai-brand-tabs { width: 100%; overflow-x: auto; flex-wrap: nowrap; }
+    .ai-brand-tabs button { flex: none; }
+}
+
+/* ===== 减少动态偏好 ===== */
+@media (prefers-reduced-motion: reduce) {
+    .ai-brand-agent, .ai-brand-agent-add, .ai-brand-agent-ghost, .ai-brand-agent-send, .ai-brand-help-row button, .ai-brand-tabs button, .ai-brand-skill-card, .ai-brand-skill-icon { transition: none; }
+    .ai-brand-skill-card:hover, .ai-brand-help-row button:hover, .ai-brand-agent-send:hover, .ai-brand-campaign:hover { transform: none; }
+    .ai-brand-campaign, .ai-brand-campaign-go { transition: none; }
+    .ai-brand-skill-card:hover .ai-brand-skill-icon { transform: none; }
+}

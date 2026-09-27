@@ -1,11 +1,12 @@
 import { expect, test } from "bun:test";
 
 import { appearanceLogoURL, normalizePublicAppearance } from "../src/stores/use-appearance-store";
+import { DEFAULT_CANVAS_APPEARANCE } from "../src/lib/canvas/agent-appearance";
 
 test("initial HTML stays brand neutral until the public appearance is resolved", async () => {
     const [html, mainSource] = await Promise.all([Bun.file(new URL("../index.html", import.meta.url)).text(), Bun.file(new URL("../src/main.tsx", import.meta.url)).text()]);
 
-    expect(html).not.toContain("影策");
+    expect(html).not.toContain("境彻");
     expect(html).toContain("<title>正在加载</title>");
     expect(mainSource).toContain("bootstrapAppearance()");
     expect(mainSource).toContain('import("./application")');
@@ -45,11 +46,15 @@ test("appearance URLs reject executable and insecure remote schemes", () => {
         authVideoUrl: "http://example.com/brand.mp4",
     });
 
-    expect(appearance.logoUrl).toBe("/logo.svg");
+    expect(appearance.logoUrl).toBe("/brand/jingche-light.png");
     expect(appearance.authVideoUrl).not.toContain("example.com");
 });
 
 test("appearance selects theme logos and falls back to the single configured logo", () => {
+    const builtIn = normalizePublicAppearance();
+    expect(appearanceLogoURL(builtIn, "light")).toBe("/brand/jingche-light.png");
+    expect(appearanceLogoURL(builtIn, "dark")).toBe("/brand/jingche-dark.png");
+
     const dual = normalizePublicAppearance({
         logoConfigured: true,
         darkLogoConfigured: true,
@@ -65,6 +70,18 @@ test("appearance selects theme logos and falls back to the single configured log
     expect(appearanceLogoURL(single, "light")).toBe(single.logoUrl);
     expect(appearanceLogoURL(single, "dark")).toBe(single.logoUrl);
     expect(single.logoFrameEnabled).toBe(true);
+});
+
+test("legacy server branding resolves to the current brand without changing custom names", () => {
+    const legacy = normalizePublicAppearance({
+        brandName: "\u5f71\u7b56",
+        seoTitle: "\u5f71\u7b56创作工作台",
+        canvas: { ...DEFAULT_CANVAS_APPEARANCE, agentName: "\u5f71\u7b56" },
+    });
+    expect(legacy.brandName).toBe("境彻");
+    expect(legacy.seoTitle).toBe("境彻创作工作台");
+    expect(legacy.canvas?.agentName).toBe("境彻");
+    expect(normalizePublicAppearance({ brandName: "HIMA Studio" }).brandName).toBe("HIMA Studio");
 });
 
 test("auth scene consumes resolved appearance instead of hardcoded media constants", async () => {
@@ -104,10 +121,9 @@ test("appearance management exposes light and dark logo uploads plus the frame s
     expect(pageSource).toContain("authVideoAutoplay");
     expect(brandSource).toContain("useActiveTheme");
     expect(brandSource).toContain("data-logo-frame-enabled");
-    expect(brandSource).toContain("failedSource === source");
-    expect(brandSource).toContain('aria-hidden="true"');
-    expect(brandSource).toContain('style.visibility = "hidden"');
-    expect(brandSource).toContain("setFailedSource(source)");
+    expect(brandSource).toContain("builtInSource");
+    expect(brandSource).toContain("failedSources.includes(displaySource)");
+    expect(brandSource).toContain("setFailedSources");
     expect(adminStyles).toContain(".admin-appearance-logo-preview-mark.is-unframed img");
     expect(globalStyles).toContain('.brand-logo-frame[data-logo-frame-enabled="false"] > :is(img, svg)');
 });
@@ -121,10 +137,10 @@ test("object storage can adopt the configured English brand identifier without r
     expect(source).toContain("setting.pathPrefix || DEFAULT_OSS_PATH_PREFIX");
 });
 
-test("appearance management exposes a server-side reset to the built-in Yingce brand", async () => {
+test("appearance management exposes a server-side reset to the built-in Jingche brand", async () => {
     const [pageSource, apiSource] = await Promise.all([Bun.file(new URL("../src/pages/admin/settings/appearance-settings-page.tsx", import.meta.url)).text(), Bun.file(new URL("../src/services/api/appearance.ts", import.meta.url)).text()]);
 
-    expect(pageSource).toContain("恢复影策默认");
+    expect(pageSource).toContain("恢复境彻默认");
     expect(pageSource).toContain("resetAdminAppearance()");
     expect(pageSource).toContain("已上传文件仍保留在存储资源中");
     expect(apiSource).toContain('http.delete<{ setting: AdminAppearance }>("/admin/settings/appearance")');

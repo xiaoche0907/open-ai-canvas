@@ -68,6 +68,13 @@
 .tryon-task-empty svg { color: var(--muted-foreground); }
 .tryon-task-empty strong { font-size: 12px; }
 .tryon-task-empty p { max-width: 210px; margin: 0; color: var(--muted-foreground); font-size: 11px; line-height: 1.6; }
+.tryon-task-list { display: flex; flex-direction: column; gap: 8px; }
+.tryon-task-item { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 62px; padding: 8px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); color: var(--foreground); text-align: left; }
+.tryon-task-item:hover { border-color: var(--foreground); }
+.tryon-task-item .tryon-task-thumb { flex: none; }
+.tryon-task-item > span:nth-child(2) { display: flex; flex: 1; flex-direction: column; gap: 4px; min-width: 0; }
+.tryon-task-item strong { font-size: 12px; }
+.tryon-task-item small { overflow: hidden; color: var(--muted-foreground); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
 .tryon-tool-rail { display: flex; flex-direction: column; justify-content: space-between; min-height: 0; overflow-y: auto; padding: 10px 7px; background: var(--surface); scrollbar-width: none; }
 .tryon-tool-rail-list,
 .tryon-tool-rail-bottom { display: flex; flex-direction: column; gap: 5px; }
@@ -76,6 +83,9 @@
 .tryon-tool-rail button span { max-width: 100%; font-size: 10px; line-height: 1.25; overflow-wrap: anywhere; }
 .tryon-tool-rail button:hover { background: var(--surface-hover); color: var(--foreground); }
 .tryon-tool-rail button.is-current { background: var(--workspace-accent-soft); color: var(--foreground); font-weight: 700; }
+.tryon-tool-rail button > svg { width: 34px; height: 34px; padding: 7px; border-radius: 10px; background: var(--bg-secondary); color: inherit; transition: background .18s ease, color .18s ease, transform .18s ease; }
+.tryon-tool-rail button:hover > svg { background: var(--surface-hover); }
+.tryon-tool-rail button.is-current > svg { background: var(--foreground); color: var(--background); transform: scale(1.04); }
 .tryon-sidebar { display: flex; flex-direction: column; gap: 24px; min-height: 0; overflow-y: auto; padding: 24px 20px 0; background: var(--surface); scrollbar-width: none; }
 .tryon-eyebrow { color: var(--muted-foreground); font-size: 10px; font-weight: 700; letter-spacing: 0.13em; }
 .tryon-form-section { display: flex; flex-direction: column; gap: 11px; }
@@ -105,9 +115,9 @@
 .tryon-upload-more { display: grid; place-items: center; color: var(--muted-foreground); }
 .tryon-upload-more:hover { color: var(--foreground); border-color: var(--foreground); }
 .tryon-flat-upload { overflow: hidden; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--bg-secondary); }
-.tryon-flat-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.tryon-flat-tabs button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border: 0; background: transparent; color: var(--muted-foreground); font-size: 12px; font-weight: 600; }
-.tryon-flat-tabs button.is-active { background: var(--surface); color: var(--foreground); box-shadow: inset 0 -2px var(--foreground); }
+.tryon-flat-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; padding: 3px; background: var(--bg-secondary); border-radius: var(--r-md); }
+.tryon-flat-tabs button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--muted-foreground); font-size: 12px; font-weight: 600; transition: background .18s ease, color .18s ease; }
+.tryon-flat-tabs button.is-active { background: var(--surface); color: var(--foreground); font-weight: 700; box-shadow: var(--elevation-hairline); }
 .tryon-flat-fields, .tryon-flat-pairing { display: flex; flex-direction: column; gap: 12px; padding: 12px; }
 .tryon-flat-pairing { padding-top: 4px; }
 .tryon-flat-pairing > strong { font-size: 12px; }
@@ -118,11 +128,60 @@
 .tryon-flat-dropzone { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; min-height: 62px; padding: 10px; border: 1px dashed var(--border); border-radius: var(--r-md); background: var(--bg-secondary); color: var(--foreground); font-size: 11px; }
 .tryon-flat-dropzone:hover { border-color: var(--foreground); background: var(--surface-hover); }
 .tryon-flat-field .tryon-upload-list { align-self: stretch; }
+.tryon-shoe-upload { overflow: hidden; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--bg-secondary); }
+.tryon-shoe-upload .tryon-flat-tabs button { gap: 6px; }
+.tryon-member-badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 5px; border-radius: var(--r-xs); background: var(--workspace-accent-soft); color: var(--foreground); font-size: 10px; font-weight: 600; white-space: nowrap; }
+.tryon-shoe-single, .tryon-shoe-multi { display: flex; flex-direction: column; gap: 10px; padding: 12px; }
+.tryon-shoe-single { align-items: center; }
+.tryon-shoe-single .tryon-upload-list { align-self: stretch; }
+.tryon-shoe-dropzone { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; width: 100%; min-height: 142px; padding: 16px; border: 1px dashed var(--border); border-radius: var(--r-md); background: var(--surface); color: var(--foreground); text-align: center; }
+.tryon-shoe-dropzone strong { font-size: 12px; font-weight: 650; }
+.tryon-shoe-dropzone span { color: var(--muted-foreground); font-size: 11px; }
+.tryon-shoe-dropzone:hover { border-color: var(--foreground); background: var(--surface-hover); }
+.tryon-shoe-multi { gap: 10px; }
+.tryon-shoe-angle-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.tryon-shoe-field { display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; padding: 8px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); }
+.tryon-shoe-field .tryon-shoe-dropzone { min-height: 126px; padding: 10px; border: 0; }
+.tryon-shoe-field:not(.is-pair) .tryon-shoe-dropzone strong { max-width: 110px; line-height: 1.5; }
+.tryon-shoe-field.is-pair .tryon-shoe-dropzone { min-height: 142px; }
+.tryon-shoe-field .tryon-library-button { max-width: 100%; padding-inline: 8px; }
+.tryon-shoe-selected { position: relative; width: 100%; height: 126px; overflow: hidden; border-radius: var(--r-sm); background: var(--bg-secondary); }
+.tryon-shoe-field.is-pair .tryon-shoe-selected { height: 142px; }
+.tryon-shoe-replace { position: relative; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; color: var(--foreground); }
+.tryon-shoe-replace img { width: 100%; height: 100%; object-fit: contain; }
+.tryon-shoe-replace span { position: absolute; right: 0; bottom: 0; left: 0; padding: 5px; background: var(--surface); font-size: 10px; text-align: center; }
+.tryon-shoe-selected .tryon-shoe-remove { position: absolute; top: 6px; right: 6px; display: grid; width: 30px; height: 30px; place-items: center; border: 0; border-radius: var(--r-sm); background: var(--surface); color: var(--foreground); }
+.tryon-shoe-examples { display: flex; align-items: center; gap: 8px; margin: 0 12px 10px; padding: 6px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); }
+.tryon-shoe-examples > span { flex: none; color: var(--muted-foreground); font-size: 10px; }
+.tryon-shoe-examples > div { display: flex; gap: 5px; min-width: 0; }
+.tryon-shoe-examples button { width: 45px; height: 45px; overflow: hidden; padding: 2px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); }
+.tryon-shoe-examples button[aria-pressed="true"] { border-color: var(--foreground); }
+.tryon-shoe-examples img { width: 100%; height: 100%; object-fit: contain; }
+.tryon-shoe-tip { margin: 0; padding: 0 12px 12px; color: var(--muted-foreground); font-size: 11px; line-height: 1.5; }
+.tryon-shoe-upload button:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.tryon-accessory-categories { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; margin: 2px 0 12px; }
+.tryon-accessory-categories button { min-height: 38px; padding: 5px 3px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); color: var(--muted-foreground); font-size: 11px; font-weight: 600; white-space: nowrap; }
+.tryon-accessory-categories button:hover { background: var(--surface-hover); color: var(--foreground); }
+.tryon-accessory-categories button.is-active { border-color: var(--foreground); background: var(--surface); color: var(--foreground); box-shadow: 0 1px 3px var(--border); }
+.tryon-accessory-upload { display: flex; flex-direction: column; align-items: center; gap: 9px; padding: 12px; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--bg-secondary); }
+.tryon-accessory-dropzone { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 106px; padding: 13px 8px; border: 1px dashed var(--border); border-radius: var(--r-md); background: var(--surface); color: var(--foreground); text-align: center; }
+.tryon-accessory-dropzone:hover { border-color: var(--foreground); background: var(--surface-hover); }
+.tryon-accessory-dropzone strong { font-size: 11px; font-weight: 650; }
+.tryon-accessory-upload .tryon-upload-list { align-self: stretch; }
+.tryon-accessory-examples { display: flex; align-items: center; align-self: stretch; gap: 8px; min-height: 47px; }
+.tryon-accessory-examples > span { color: var(--muted-foreground); font-size: 11px; }
+.tryon-accessory-examples > div { display: flex; gap: 5px; }
+.tryon-accessory-examples button { width: 45px; height: 45px; overflow: hidden; padding: 2px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); }
+.tryon-accessory-examples button[aria-pressed="true"] { border-color: var(--foreground); }
+.tryon-accessory-examples img { width: 100%; height: 100%; object-fit: contain; }
+.tryon-accessory-tip { align-self: stretch; margin: 0; padding-top: 8px; border-top: 1px solid var(--border); color: var(--muted-foreground); font-size: 11px; line-height: 1.5; }
+.tryon-accessory-tip strong { margin-right: 6px; color: var(--foreground); font-style: italic; }
+.tryon-accessory-categories button:focus-visible, .tryon-accessory-upload button:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
 .tryon-reference-body { overflow: hidden; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--bg-secondary); }
-.tryon-mode-tabs { display: grid; grid-template-columns: 1fr 1fr; min-height: 46px; border-bottom: 1px solid var(--border); }
-.tryon-mode-tabs button { position: relative; border: 0; background: transparent; color: var(--muted-foreground); font-size: 12px; font-weight: 600; }
-.tryon-mode-tabs button.is-active { color: var(--foreground); }
-.tryon-mode-tabs button.is-active::after { position: absolute; right: 38%; bottom: 0; left: 38%; height: 2px; border-radius: 2px; background: var(--foreground); content: ""; }
+.tryon-mode-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 3px; background: var(--bg-secondary); border-radius: var(--r-md); }
+.tryon-mode-tabs button { position: relative; display: flex; align-items: center; justify-content: center; min-height: 38px; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--muted-foreground); font-size: 12px; font-weight: 600; transition: background .18s ease, color .18s ease; }
+.tryon-mode-tabs button:hover { color: var(--foreground); }
+.tryon-mode-tabs button.is-active { background: var(--surface); color: var(--foreground); font-weight: 700; box-shadow: var(--elevation-hairline); }
 .tryon-smart-card { display: flex; align-items: center; gap: 12px; min-height: 104px; margin: 12px; padding: 14px; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); }
 .tryon-smart-icon { display: grid; flex: none; width: 38px; height: 38px; place-items: center; border-radius: var(--r-md); background: var(--workspace-accent-soft); }
 .tryon-smart-card strong { font-size: 12px; }
@@ -144,17 +203,51 @@
 .tryon-description-section { gap: 8px; padding: 14px 12px; border-top: 1px solid var(--border); }
 .tryon-textarea-wrap { overflow: hidden; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--bg-secondary); }
 .tryon-description-section .tryon-textarea-wrap { background: var(--surface); }
-.tryon-description-section textarea { display: block; width: 100%; min-height: 142px; resize: vertical; padding: 12px; border: 0; background: transparent; color: var(--foreground); font: inherit; font-size: 12px; line-height: 1.6; }
+.tryon-description-section textarea { display: block; width: 100%; min-height: 142px; resize: vertical; padding: 12px; border: 0; background: transparent; color: var(--foreground); font: inherit; font-size: 12px; line-height: 1.6; overflow-x: hidden; overflow-wrap: break-word; white-space: pre-wrap; }
 .tryon-description-section textarea::placeholder { color: var(--muted-foreground); }
-.tryon-textarea-wrap > div { display: flex; justify-content: space-between; gap: 10px; padding: 7px 11px; border-top: 1px solid var(--border); color: var(--muted-foreground); font-size: 10px; }
-.tryon-textarea-wrap > div > span:last-child { display: inline-flex; align-items: center; gap: 7px; }
-.tryon-textarea-wrap > div button { display: grid; width: 20px; height: 20px; place-items: center; border: 0; background: transparent; color: var(--muted-foreground); }
+.tryon-desc-tools { display: flex; flex-wrap: nowrap; align-items: center; gap: 6px; padding: 7px 11px; }
+.tryon-desc-tools button { display: inline-flex; align-items: center; gap: 5px; min-height: 26px; padding: 0 9px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); color: var(--foreground); font-size: 11px; white-space: nowrap; }
+.tryon-desc-tools button:hover { border-color: var(--foreground); }
+.tryon-desc-count { display: inline-flex; align-items: center; gap: 7px; margin-left: auto; color: var(--muted-foreground); font-size: 10px; }
+.tryon-desc-count button { display: grid; width: 20px; height: 20px; padding: 0; place-items: center; border: 0; background: transparent; color: var(--muted-foreground); }
 .tryon-consistent-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-top: 1px solid var(--border); font-size: 11px; cursor: pointer; }
 .tryon-consistent-row > span:first-child { display: inline-flex; align-items: center; gap: 5px; }
 .tryon-consistent-row input { position: absolute; opacity: 0; }
 .tryon-switch { position: relative; width: 33px; height: 19px; border-radius: 999px; background: var(--border); }
 .tryon-switch::after { position: absolute; top: 3px; left: 3px; width: 13px; height: 13px; border-radius: 50%; background: var(--surface); content: ""; transition: transform .18s ease; }
 .tryon-consistent-row input:checked + .tryon-switch { background: var(--foreground); }
+
+/* 姿势参考：智能换姿 / 文字换姿 / 以图换姿 */
+.tryon-pose-smart { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 12px; margin: 12px; }
+.tryon-pose-smart .tryon-smart-card { margin: 0; }
+.tryon-pose-sample { display: grid; flex: none; width: 92px; aspect-ratio: 3 / 4; place-items: center; overflow: hidden; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); }
+.tryon-pose-sample img { width: 100%; height: 100%; object-fit: cover; }
+.tryon-pose-count-tip { grid-column: 1 / -1; color: var(--muted-foreground); font-size: 11px; }
+.tryon-pose-text { display: flex; flex-direction: column; gap: 8px; padding: 12px; }
+.tryon-pose-textarea { display: block; width: 100%; min-height: 96px; resize: vertical; padding: 11px 12px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); color: var(--foreground); font: inherit; font-size: 12px; line-height: 1.6; overflow-x: hidden; overflow-wrap: break-word; white-space: pre-wrap; }
+.tryon-pose-textarea::placeholder { color: var(--muted-foreground); }
+.tryon-pose-tools { display: flex; flex-wrap: nowrap; align-items: center; gap: 6px; }
+.tryon-pose-tools button { display: inline-flex; align-items: center; gap: 5px; min-height: 28px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); color: var(--foreground); font-size: 11px; white-space: nowrap; }
+.tryon-pose-tools button:hover { border-color: var(--foreground); }
+.tryon-pose-tools > span { margin-left: auto; color: var(--muted-foreground); font-size: 10px; }
+.tryon-pose-text-ref { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); }
+.tryon-pose-text-ref img { flex: none; width: 34px; height: 34px; border-radius: var(--r-sm); object-fit: cover; }
+.tryon-pose-text-ref span { flex: 1; min-width: 0; overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.tryon-pose-text-ref button { display: grid; flex: none; width: 22px; height: 22px; place-items: center; border: 0; background: transparent; color: var(--muted-foreground); }
+.tryon-pose-image { display: flex; flex-direction: column; gap: 10px; padding: 12px; }
+.tryon-pose-upload { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; width: 100%; min-height: 150px; padding: 14px; border: 1px dashed var(--border); border-radius: var(--r-lg); background: var(--surface); color: var(--foreground); }
+.tryon-pose-upload:hover { border-color: var(--foreground); }
+.tryon-pose-upload-icon { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 50%; background: var(--bg-secondary); color: var(--muted-foreground); }
+.tryon-pose-upload strong { font-size: 12px; }
+.tryon-pose-upload > span:last-child { color: var(--muted-foreground); font-size: 11px; }
+.tryon-pose-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.tryon-pose-item { position: relative; width: 84px; }
+.tryon-pose-item img { display: block; width: 100%; aspect-ratio: 3 / 4; border: 1px solid var(--border); border-radius: var(--r-md); object-fit: cover; }
+.tryon-pose-item button { position: absolute; top: 4px; right: 4px; display: grid; width: 20px; height: 20px; place-items: center; border: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.6); color: #fff; }
+.tryon-pose-add-more { display: grid; width: 84px; aspect-ratio: 3 / 4; place-items: center; border: 1px dashed var(--border); border-radius: var(--r-md); background: var(--surface); color: var(--muted-foreground); }
+.tryon-pose-add-more:hover { border-color: var(--foreground); color: var(--foreground); }
+.tryon-pose-tips { display: flex; gap: 6px; margin: 0; color: var(--muted-foreground); font-size: 10px; line-height: 1.6; }
+.tryon-pose-tips span { flex: none; color: var(--foreground); font-weight: 700; }
 .tryon-consistent-row input:checked + .tryon-switch::after { transform: translateX(14px); }
 .tryon-consistent-row input:focus-visible + .tryon-switch { outline: 2px solid var(--ring); outline-offset: 2px; }
 .tryon-model-modal .ant-modal-container { background: var(--surface); }
@@ -165,27 +258,47 @@
 .tryon-model-dialog-header strong { font-size: 16px; }
 .tryon-model-dialog-header span { color: var(--muted-foreground); font-size: 11px; }
 .tryon-model-dialog-header button { display: grid; width: 30px; height: 30px; place-items: center; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--foreground); }
-.tryon-model-dialog-tabs { display: flex; gap: 20px; padding: 0 24px; border-bottom: 1px solid var(--border); }
-.tryon-model-dialog-tabs button { position: relative; display: inline-flex; align-items: center; gap: 5px; min-height: 42px; padding: 0 2px; border: 0; background: transparent; color: var(--muted-foreground); font-size: 12px; }
-.tryon-model-dialog-tabs button.is-active { color: var(--foreground); font-weight: 700; }
-.tryon-model-dialog-tabs button.is-active::after { position: absolute; right: 0; bottom: 0; left: 0; height: 2px; background: var(--foreground); content: ""; }
-.tryon-model-dialog-tabs button span { color: var(--muted-foreground); font-size: 10px; }
+.tryon-model-dialog-tabs { display: flex; gap: 4px; padding: 3px; margin: 0 24px 14px; align-self: flex-start; background: var(--bg-secondary); border-radius: var(--r-md); }
+.tryon-model-dialog-tabs button { position: relative; display: inline-flex; align-items: center; gap: 5px; min-height: 36px; padding: 0 16px; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--muted-foreground); font-size: 12px; transition: background .18s ease, color .18s ease; }
+.tryon-model-dialog-tabs button.is-active { background: var(--surface); color: var(--foreground); font-weight: 700; box-shadow: var(--elevation-hairline); }
+.tryon-model-dialog-tabs button span { color: var(--muted-foreground); font-size: 11px; }
 .tryon-model-dialog-content { min-height: 370px; max-height: min(68vh, 650px); overflow-y: auto; padding: 18px 24px 28px; }
+/* 筛选栏：性别分段 + 提示（参考角色库弹窗结构） */
+.tryon-model-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.tryon-model-toolbar > p { margin: 0; color: var(--muted-foreground); font-size: 11px; }
+.tryon-model-filters { display: inline-flex; align-items: center; gap: 4px; padding: 3px; border-radius: 10px; background: var(--bg-secondary); }
+.tryon-model-filters button { display: inline-flex; align-items: center; height: 28px; padding: 0 14px; border: 0; border-radius: 8px; background: transparent; color: var(--muted-foreground); font-size: 12px; cursor: pointer; transition: background 0.18s ease, color 0.18s ease; }
+.tryon-model-filters button:hover { color: var(--foreground); }
+.tryon-model-filters button.is-active { background: var(--foreground); color: var(--background); font-weight: 600; }
+/* 创建新模特占位卡（参考角色库的“创建新角色”入口） */
+.tryon-model-create-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 210px; padding: 12px; border: 1px dashed var(--border); border-radius: var(--r-md); background: transparent; color: var(--muted-foreground); text-align: center; cursor: pointer; transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease; }
+.tryon-model-create-card:hover { border-color: var(--foreground); background: var(--surface-hover); color: var(--foreground); }
+.tryon-model-create-icon { display: grid; width: 44px; height: 44px; place-items: center; border-radius: 12px; background: var(--bg-secondary); color: var(--muted-foreground); transition: color 0.18s ease; }
+.tryon-model-create-card:hover .tryon-model-create-icon { color: var(--foreground); }
+.tryon-model-create-card strong { font-size: 12px; color: var(--foreground); }
+.tryon-model-create-card > span:last-child { font-size: 11px; }
+/* 底部创建按钮 */
+.tryon-model-dialog-footer { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 14px 24px 20px; border-top: 1px solid var(--border); }
+.tryon-model-create-primary { display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 0 18px; border: 0; border-radius: 10px; background: var(--foreground); color: var(--background); font-size: 12px; font-weight: 600; cursor: pointer; transition: opacity 0.18s ease; }
+.tryon-model-create-primary:hover { opacity: 0.9; }
 .tryon-model-dialog-content > p { margin: 0 0 16px; color: var(--muted-foreground); font-size: 11px; }
+.tryon-model-card-wrap { position: relative; min-width: 0; }
+.tryon-model-card-wrap > button[aria-label="删除模特"] { position: absolute; top: 4px; right: 4px; z-index: 2; display: grid; width: 18px; height: 18px; place-items: center; padding: 0; border: 0; border-radius: 50%; background: var(--foreground); color: var(--background); opacity: 0.92; }
+.tryon-model-card-wrap > button[aria-label="删除模特"]:hover { opacity: 1; transform: scale(1.06); }
 .tryon-model-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 12px; }
-.tryon-model-grid > button { position: relative; display: flex; flex-direction: column; gap: 7px; min-width: 0; overflow: hidden; padding: 5px 5px 9px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); color: var(--foreground); text-align: left; }
-.tryon-model-grid > button:hover { border-color: var(--foreground); }
-.tryon-model-grid > button.is-selected { outline: 2px solid var(--foreground); outline-offset: 1px; }
+.tryon-model-card-wrap > button { position: relative; display: flex; flex-direction: column; gap: 7px; min-width: 0; overflow: hidden; padding: 5px 5px 9px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); color: var(--foreground); text-align: left; }
+.tryon-model-card-wrap > button:hover { border-color: var(--foreground); }
+.tryon-model-card-wrap > button.is-selected { outline: 2px solid var(--foreground); outline-offset: 1px; }
 .tryon-model-grid img { display: block; width: 100%; aspect-ratio: 3 / 4; border-radius: var(--r-sm); object-fit: cover; }
-.tryon-model-grid > button > span { padding: 0 4px; overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
-.tryon-model-selected-icon { position: absolute; top: 10px; right: 10px; padding: 2px; border-radius: 50%; background: var(--foreground); color: var(--background); }
+.tryon-model-card-wrap > button > span { padding: 0 4px; overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.tryon-model-selected-icon { position: absolute; top: 10px; left: 10px; padding: 2px; border-radius: 50%; background: var(--foreground); color: var(--background); }
 .tryon-model-own-actions { display: flex; gap: 8px; margin-bottom: 18px; }
 .tryon-model-own-actions button { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); color: var(--foreground); font-size: 11px; }
 .tryon-model-own-actions button:hover { background: var(--surface-hover); }
 .tryon-model-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; min-height: 270px; border: 1px dashed var(--border); border-radius: var(--r-md); background: var(--bg-secondary); text-align: center; }
 .tryon-model-empty strong { font-size: 12px; }
 .tryon-model-empty span { color: var(--muted-foreground); font-size: 11px; }
-.tryon-choice-grid { display: grid; gap: 5px; padding: 4px; border-radius: var(--r-md); background: var(--bg-secondary); }
+.tryon-choice-grid { display: grid; gap: 5px; padding: 4px; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--bg-secondary); }
 .tryon-choice-grid.is-two { grid-template-columns: repeat(2, 1fr); }
 .tryon-choice-grid.is-three { grid-template-columns: repeat(3, 1fr); }
 .tryon-choice-grid button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 42px; padding: 5px 4px; border: 1px solid transparent; border-radius: var(--r-sm); background: transparent; color: var(--muted-foreground); font-size: 11px; }
@@ -213,8 +326,11 @@
 .tryon-cost-preview > div { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 11px; }
 .tryon-cost-preview > div > span { color: var(--muted-foreground); white-space: nowrap; }
 .tryon-cost-preview strong { min-width: 0; margin-left: auto; overflow: hidden; font-size: 11px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
-.tryon-generate-button { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 42px; border: 1px solid var(--foreground); border-radius: var(--r-md); background: var(--foreground); color: var(--background); font-size: 13px; font-weight: 700; }
-.tryon-generate-button:hover { opacity: .85; }
+.tryon-cost-preview select.tryon-model-select { min-width: 0; max-width: 100%; min-height: 30px; margin-left: auto; padding: 0 6px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); color: var(--foreground); font: inherit; font-size: 11px; cursor: pointer; }
+.tryon-cost-preview select.tryon-model-select:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+.tryon-generate-button { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 44px; border: 1px solid var(--foreground); border-radius: var(--r-md); background: var(--foreground); color: var(--background); font-size: 13px; font-weight: 700; box-shadow: 0 8px 22px color-mix(in srgb, var(--foreground) 20%, transparent); transition: opacity .18s ease, transform .18s ease, box-shadow .18s ease; }
+.tryon-generate-button:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 12px 28px color-mix(in srgb, var(--foreground) 28%, transparent); }
+.tryon-generate-button:active { transform: translateY(0); }
 .tryon-sidebar-footer > span { color: var(--muted-foreground); font-size: 10px; text-align: center; }
 
 .tryon-main { min-width: 0; min-height: 0; overflow-y: auto; background: var(--background); scrollbar-width: none; }
@@ -232,6 +348,8 @@
 .tryon-preview-switch span { padding: 0 9px; color: var(--muted-foreground); font-size: 11px; }
 .tryon-preview-switch button { min-height: 28px; padding: 0 10px; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--muted-foreground); font-size: 11px; }
 .tryon-preview-switch button[aria-pressed="true"] { background: var(--surface); color: var(--foreground); box-shadow: var(--elevation-hairline); }
+.tryon-result-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 14px; }
+.tryon-result-grid .tryon-result-card { width: 100%; }
 .tryon-result-card, .tryon-result-loading { position: relative; width: min(100%, 302px); aspect-ratio: 2 / 3; overflow: hidden; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); }
 .tryon-result-image { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; color: var(--foreground); }
 .tryon-result-image img { display: block; width: 100%; height: 100%; object-fit: cover; }
@@ -240,10 +358,11 @@
 .tryon-result-actions { right: 9px; bottom: 9px; }
 .tryon-result-feedback button, .tryon-result-actions button, .tryon-result-actions a, .tryon-preview-feedback button { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); color: var(--foreground); }
 .tryon-result-feedback button[aria-pressed="true"], .tryon-result-actions button[aria-pressed="true"], .tryon-preview-feedback button[aria-pressed="true"] { background: var(--foreground); color: var(--background); }
-.tryon-result-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; background: var(--bg-secondary); text-align: center; }
-.tryon-result-loading svg { animation: tryon-spin 1.4s linear infinite; }
+.tryon-result-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: linear-gradient(120deg, var(--bg-secondary) 0%, var(--surface) 50%, var(--bg-secondary) 100%); background-size: 200% 100%; animation: tryon-shimmer 2.2s linear infinite; text-align: center; }
+.tryon-loading-spinner { display: grid; width: 46px; height: 46px; place-items: center; border-radius: 50%; background: var(--workspace-accent-soft); color: var(--foreground); }
+.tryon-loading-spinner svg { animation: tryon-spin 1s linear infinite; }
 .tryon-result-loading strong { font-size: 12px; }
-.tryon-result-loading span { max-width: 185px; color: var(--muted-foreground); font-size: 11px; line-height: 1.5; }
+.tryon-result-loading span { max-width: 150px; color: var(--muted-foreground); font-size: 11px; line-height: 1.5; }
 .tryon-results-note { color: var(--muted-foreground); font-size: 11px; }
 .tryon-preview-modal .ant-modal-container { background: var(--background); }
 .tryon-preview-shell { display: grid; grid-template-columns: 88px minmax(0, 1fr) 264px; height: min(820px, calc(100vh - 48px)); min-height: 480px; color: var(--foreground); }
@@ -271,6 +390,9 @@
 .tryon-preview-info dl > div { display: flex; justify-content: space-between; gap: 10px; }
 .tryon-preview-info dt { color: var(--muted-foreground); }
 .tryon-preview-info dd { margin: 0; }
+.tryon-preview-prompt { display: flex; flex-direction: column; gap: 6px; }
+.tryon-preview-prompt strong { font-size: 11px; color: var(--muted-foreground); }
+.tryon-preview-prompt p { margin: 0; font-size: 11px; line-height: 1.6; color: var(--foreground); }
 .tryon-preview-source { display: flex; flex-direction: column; gap: 7px; }
 .tryon-preview-source strong { font-size: 11px; }
 .tryon-preview-source img { width: 100%; max-height: 190px; object-fit: contain; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); }
@@ -335,6 +457,7 @@
     .tryon-preview-thumbs button { width: 48px; height: 64px; }
     .tryon-model-dialog-content { padding-inline: 16px; }
     .tryon-model-dialog-header, .tryon-model-dialog-tabs { padding-inline: 16px; }
+    .tryon-model-dialog-footer { padding-inline: 16px; }
     .tryon-model-grid { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; }
 }
 @media (max-width: 560px) {
@@ -350,4 +473,157 @@
     .tryon-dropzone { transition: none; }
     .tryon-switch::after { transition: none; }
     .tryon-result-loading svg { animation: none; }
+}
+/* 词库弹层：我的提示词 */
+.tryon-prompt-panel { display: flex; flex-direction: column; min-height: 100%; }
+.tryon-prompt-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.tryon-prompt-panel-header > div { display: inline-flex; align-items: center; gap: 8px; }
+.tryon-prompt-panel-header strong { font-size: 14px; }
+.tryon-prompt-panel-header button { display: grid; width: 28px; height: 28px; place-items: center; border: 0; background: transparent; color: var(--muted-foreground); }
+.tryon-prompt-search { display: flex; flex-wrap: nowrap; align-items: center; gap: 6px; padding: 12px 16px; }
+.tryon-prompt-search-input { display: flex; flex: 1; align-items: center; gap: 6px; min-height: 32px; padding: 0 9px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); color: var(--muted-foreground); }
+.tryon-prompt-search-input:focus-within { border-color: var(--foreground); }
+.tryon-prompt-search-input input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--foreground); font: inherit; font-size: 12px; outline: none; }
+.tryon-prompt-search > button { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); color: var(--foreground); font-size: 11px; white-space: nowrap; }
+.tryon-prompt-search > button:hover { border-color: var(--foreground); }
+.tryon-prompt-list { display: flex; flex: 1; flex-direction: column; gap: 8px; padding: 4px 16px 16px; overflow-y: auto; }
+.tryon-prompt-item { display: flex; flex-direction: column; gap: 5px; width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); color: var(--foreground); text-align: left; }
+.tryon-prompt-item:hover { border-color: var(--foreground); }
+.tryon-prompt-item strong { font-size: 12px; }
+.tryon-prompt-item span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--muted-foreground); font-size: 11px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: break-word; }
+.tryon-prompt-empty { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 40px 24px; color: var(--muted-foreground); text-align: center; }
+.tryon-prompt-empty-icon { display: grid; width: 52px; height: 52px; place-items: center; border-radius: 50%; background: var(--bg-secondary); color: var(--muted-foreground); }
+.tryon-prompt-empty strong { font-size: 13px; color: var(--foreground); }
+.tryon-prompt-empty p { max-width: 220px; font-size: 11px; line-height: 1.6; }
+.tryon-prompt-empty button, .tryon-prompt-panel-footer button { display: inline-flex; align-items: center; gap: 5px; min-height: 30px; padding: 0 14px; border: 1px solid var(--foreground); border-radius: var(--r-sm); background: var(--surface); color: var(--foreground); font-size: 12px; }
+.tryon-prompt-empty button:hover, .tryon-prompt-panel-footer button:hover { background: var(--bg-secondary); }
+.tryon-prompt-panel-footer { padding: 12px 16px; border-top: 1px solid var(--border); }
+.tryon-prompt-panel-footer button { width: 100%; justify-content: center; }
+
+/* 新建提示词模态 */
+.tryon-prompt-create { display: flex; flex-direction: column; gap: 14px; padding: 16px 18px 18px; }
+.tryon-prompt-create-header { display: flex; align-items: center; justify-content: space-between; }
+.tryon-prompt-create-header strong { font-size: 15px; }
+.tryon-prompt-create-header button { display: grid; width: 28px; height: 28px; place-items: center; border: 0; background: transparent; color: var(--muted-foreground); }
+.tryon-prompt-create-field { position: relative; display: flex; flex-direction: column; gap: 6px; }
+.tryon-prompt-create-field label { font-size: 12px; font-weight: 650; }
+.tryon-prompt-create-field input, .tryon-prompt-create-field textarea { display: block; width: 100%; padding: 10px 11px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); color: var(--foreground); font: inherit; font-size: 12px; line-height: 1.6; overflow-x: hidden; overflow-wrap: break-word; white-space: pre-wrap; }
+.tryon-prompt-create-field input { padding-right: 52px; }
+.tryon-prompt-create-field input:focus, .tryon-prompt-create-field textarea:focus { border-color: var(--foreground); outline: none; }
+.tryon-prompt-create-field textarea { resize: vertical; }
+.tryon-prompt-create-field > span { position: absolute; right: 9px; bottom: 9px; color: var(--muted-foreground); font-size: 10px; }
+.tryon-prompt-create-field:first-of-type > span { bottom: 11px; }
+.tryon-prompt-create-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 2px; }
+.tryon-prompt-create-actions button { min-height: 32px; padding: 0 20px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); color: var(--foreground); font-size: 12px; }
+.tryon-prompt-create-actions button.is-primary { border-color: transparent; background: var(--foreground); color: var(--bg-secondary); }
+
+/* 点击/聚焦输入时不显示默认 2px outline 线，改用容器边框柔和高亮作聚焦指示 */
+.tryon-description-section textarea:focus { outline: none; }
+.tryon-description-section .tryon-textarea-wrap:focus-within { border-color: color-mix(in srgb, var(--workspace-accent) 46%, transparent); }
+.tryon-pose-textarea:focus { outline: none; border-color: color-mix(in srgb, var(--workspace-accent) 46%, transparent); }
+.tryon-prompt-create-field input:focus,
+.tryon-prompt-create-field textarea:focus,
+.tryon-prompt-search-input input:focus { outline: none; }
+/* 非换姿工具：智能模特勾选行 */
+.tryon-smart-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: default;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-text-primary, #e8ecf4);
+}
+.tryon-smart-option input[type="checkbox"] {
+    accent-color: var(--color-primary, #d9a05b);
+    width: 16px;
+    height: 16px;
+    margin: 0;
+}
+.tryon-smart-desc {
+    margin: 4px 0 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--color-text-secondary, #aab2c5);
+}
+
+/* 智能模特：左文右图 */
+.tryon-smart-row { display: flex; align-items: center; gap: 16px; }
+.tryon-smart-info { flex: 1; min-width: 0; }
+.tryon-smart-figure { flex: none; width: 76px; aspect-ratio: 3 / 4; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); overflow: hidden; }
+.tryon-smart-figure img { width: 100%; height: 100%; object-fit: cover; }
+
+/* 参考模特图：左人形占位 + 右选择参考图 */
+.tryon-model-ref-panel { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.tryon-model-ref-placeholder { flex: none; display: flex; align-items: center; justify-content: center; width: 148px; aspect-ratio: 3 / 4; max-height: 220px; border: 1px dashed var(--border); border-radius: var(--r-md); background: var(--surface); color: var(--muted-foreground); }
+.tryon-model-ref-placeholder svg { width: 52px; height: 74px; }
+.tryon-model-ref-select { flex: none; display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-height: 36px; padding: 0 16px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); color: var(--foreground); font-size: 12px; white-space: nowrap; cursor: pointer; transition: border-color .18s ease; }
+.tryon-model-ref-select:hover { border-color: var(--ring); }
+.tryon-model-ref-preview { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.tryon-model-ref-image { position: relative; flex: none; width: 148px; aspect-ratio: 3 / 4; max-height: 220px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); overflow: hidden; }
+.tryon-model-ref-image img { width: 100%; height: 100%; object-fit: cover; }
+.tryon-model-ref-image button { position: absolute; top: 6px; right: 6px; display: grid; width: 22px; height: 22px; place-items: center; border: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.6); color: #fff; cursor: pointer; }
+
+/* 非换姿工具：两个 tab 均分 */
+.tryon-mode-tabs.is-two { grid-template-columns: repeat(2, 1fr); }
+/* 智能模特：标题行（勾选 + 配图） + 说明全宽一行 */
+.tryon-model-smart { display: flex; flex-direction: column; gap: 8px; margin: 12px; }
+.tryon-smart-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.tryon-smart-figure { flex: none; width: 64px; aspect-ratio: 3 / 4; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); overflow: hidden; }
+.tryon-smart-figure img { width: 100%; height: 100%; object-fit: cover; }
+.tryon-smart-desc { margin: 0; font-size: 12px; line-height: 1.6; color: var(--muted-foreground); }
+
+/* 任务删除按钮 */
+.tryon-task-item-wrap { position: relative; }
+.tryon-task-delete { position: absolute; top: 10px; right: 10px; z-index: 1; display: grid; width: 24px; height: 24px; place-items: center; padding: 0; border: 1px solid var(--border); border-radius: 50%; background: var(--surface); color: var(--muted-foreground); cursor: pointer; transition: color .15s ease, background .15s ease, border-color .15s ease; }
+.tryon-task-delete:hover { background: var(--surface-hover); color: var(--foreground); border-color: var(--foreground); }
+
+/* 生成中：结果网格内 loading 卡 */
+.tryon-generate-button svg.tryon-spin { animation: tryon-spin 1s linear infinite; }
+@keyframes tryon-shimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .tryon-generate-button svg.tryon-spin, .tryon-result-loading, .tryon-loading-spinner svg { animation: none; } }
+
+/* ===== 商业级打磨：光标、微动效、层级 ===== */
+/* 光标全覆盖 */
+.tryon-choice-grid button, .tryon-ratio-grid button, .tryon-count-row select, .tryon-accessory-categories button, .tryon-model-dialog-tabs button, .tryon-preview-switch button, .tryon-task-item, .tryon-task-new, .tryon-task-close, .tryon-task-delete, .tryon-upload-more, .tryon-library-button, .tryon-model-ref-select, .tryon-desc-tools button, .tryon-pose-tools button, .tryon-example-row button, .tryon-dropzone, .tryon-shoe-dropzone, .tryon-accessory-dropzone, .tryon-tool-rail button, .tryon-main-tabs button, .tryon-mode-tabs button, .tryon-flat-tabs button, .tryon-result-image, .tryon-result-feedback button, .tryon-result-actions button, .tryon-preview-bottom button, .tryon-preview-thumbs button, .tryon-consistent-row, .tryon-prompt-item, .tryon-model-create-card, .tryon-model-own-actions button { cursor: pointer; }
+
+/* 上传占位图标：hover 抬升 + 高亮 */
+.tryon-dropzone-icon { display: grid; width: 40px; height: 40px; place-items: center; border-radius: 50%; background: var(--bg-secondary); color: var(--muted-foreground); transition: background .18s ease, color .18s ease, transform .18s ease; }
+.tryon-dropzone:hover .tryon-dropzone-icon { background: var(--surface-hover); color: var(--foreground); transform: translateY(-2px); }
+.tryon-dropzone strong { transition: color .18s ease; }
+
+/* 结果卡 hover：抬升 + 阴影 */
+.tryon-result-card { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.tryon-result-card:hover { transform: translateY(-2px); box-shadow: var(--elevation-card); border-color: color-mix(in srgb, var(--foreground) 26%, var(--border)); }
+
+/* 灵感卡 hover */
+.tryon-inspiration-grid article { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.tryon-inspiration-grid article:hover { transform: translateY(-2px); box-shadow: var(--elevation-card); border-color: color-mix(in srgb, var(--foreground) 22%, var(--border)); }
+
+/* showcase 步骤面板 hover 描边 */
+.tryon-showcase-panel .tryon-showcase-image { transition: box-shadow .18s ease, border-color .18s ease; }
+.tryon-showcase-panel:hover .tryon-showcase-image { border-color: color-mix(in srgb, var(--foreground) 30%, var(--border)); }
+
+/* 步骤编号徽标 */
+.tryon-panel-index { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin: 11px 0 6px; border-radius: 6px; background: var(--bg-secondary); color: var(--muted-foreground); font-size: 10px; font-weight: 700; }
+
+/* 任务项 hover 反馈 */
+.tryon-task-item-wrap:hover .tryon-task-item { background: var(--surface-hover); border-color: color-mix(in srgb, var(--foreground) 22%, var(--border)); }
+.tryon-task-item { transition: background .15s ease, border-color .15s ease; }
+
+/* 工具轨 icon 微缩放 */
+.tryon-tool-rail button > svg { transform-origin: center; }
+.tryon-tool-rail button:hover > svg { transform: scale(1.06); }
+.tryon-tool-rail button.is-current:hover > svg { transform: scale(1.04); }
+
+/* 生成按钮 focus 环（键盘可访问） */
+.tryon-generate-button:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.tryon-library-button:focus-visible, .tryon-task-delete:focus-visible, .tryon-result-actions button:focus-visible, .tryon-result-feedback button:focus-visible, .tryon-tool-rail button:focus-visible, .tryon-mode-tabs button:focus-visible, .tryon-flat-tabs button:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+
+/* 减少动态偏好 */
+@media (prefers-reduced-motion: reduce) {
+    .tryon-result-card, .tryon-inspiration-grid article, .tryon-dropzone-icon, .tryon-panel-index, .tryon-task-item, .tryon-tool-rail button > svg { transition: none; }
+    .tryon-result-card:hover, .tryon-inspiration-grid article:hover { transform: none; }
+    .tryon-dropzone:hover .tryon-dropzone-icon { transform: none; }
 }

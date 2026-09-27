@@ -53,6 +53,8 @@ export interface ImageGenHistoryRecord {
 export interface ImageGenProject {
     id: string;
     canvasId?: string;
+    /** 后端「AI 图片生成」项目 ID（type=image-gen），存在表示已云端留存 */
+    backendId?: string;
     title: string;
     prompt: string;
     model: string;

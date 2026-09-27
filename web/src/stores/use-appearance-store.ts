@@ -8,22 +8,22 @@ import { resolveBackendApiUrl } from "@/stores/use-config-store";
 export const DEFAULT_PUBLIC_APPEARANCE: PublicAppearance = {
     canvas: DEFAULT_CANVAS_APPEARANCE,
     schemaVersion: 9,
-    brandName: "影策",
+    brandName: "境彻",
     brandSlug: "open-ai-canvas",
     authHeroTitle: "让一个故事，\n从文字走向银幕。",
     authHeroDescription: "",
-    logoUrl: "/logo.svg",
-    darkLogoUrl: "/logo.svg",
+    logoUrl: "/brand/jingche-light.png",
+    darkLogoUrl: "/brand/jingche-dark.png",
     logoFrameEnabled: true,
     authVideoUrl: "https://boss-shjd.biliapi.net/updream/aniforge/video/video_bbcb00bd-650d-4249-9346-5cd21fd2484c_m1hc-u0-1pu13x-3v1s.mp4",
     authVideoPosterUrl: "https://i0.hdslb.com/bfs/aitool/aniforge/image/02933f26-5f1b-49ff-a811-b7f95ee5e5b8_m1hc-u0-sau.jpg",
     authVideoAutoplay: true,
     skinId: "classic",
     activeSkin: DEFAULT_CLASSIC_SKIN,
-    seoTitle: "影策",
-    seoDescription: "影策，面向 AI 影视与短剧创作的工作台。",
+    seoTitle: "境彻",
+    seoDescription: "境彻，面向 AI 影视与短剧创作的工作台。",
     seoKeywords: "",
-    footerCopyright: `© ${new Date().getFullYear()} 影策. All rights reserved.`,
+    footerCopyright: `© ${new Date().getFullYear()} 境彻. All rights reserved.`,
     icpFilingEnabled: false,
     icpFilingNumber: "",
     logoConfigured: false,
@@ -46,25 +46,33 @@ export const useAppearanceStore = create<AppearanceStore>((set) => ({
     setAppearance: (appearance) => set({ appearance, resolved: true }),
 }));
 
+export function replaceLegacyBrandName(value: string) {
+    return value.replaceAll("\u5f71\u7b56", DEFAULT_PUBLIC_APPEARANCE.brandName);
+}
+
 export function normalizePublicAppearance(value?: Partial<PublicAppearance> | null): PublicAppearance {
-    const brandName = String(value?.brandName || "").trim();
+    const brandName = replaceLegacyBrandName(String(value?.brandName || "").trim());
     const brandSlug = normalizeBrandSlug(value?.brandSlug);
     const authHeroTitle = normalizeAppearanceCopy(value?.authHeroTitle, DEFAULT_PUBLIC_APPEARANCE.authHeroTitle);
     const authHeroDescription = normalizeAppearanceCopy(value?.authHeroDescription, DEFAULT_PUBLIC_APPEARANCE.authHeroDescription, true);
     const customVideo = Boolean(value?.authVideoConfigured);
     const logoUrl = safeAppearanceURL(value?.logoUrl, DEFAULT_PUBLIC_APPEARANCE.logoUrl);
-    const darkLogoUrl = safeAppearanceURL(value?.darkLogoUrl, logoUrl);
+    const darkLogoUrl = safeAppearanceURL(value?.darkLogoUrl, value?.logoConfigured ? logoUrl : DEFAULT_PUBLIC_APPEARANCE.darkLogoUrl);
     const resolvedBrandName = brandName || DEFAULT_PUBLIC_APPEARANCE.brandName;
-    const seoTitle = normalizeAppearanceCopy(value?.seoTitle, resolvedBrandName);
-    const seoDescription = normalizeAppearanceCopy(value?.seoDescription, `${resolvedBrandName}，面向 AI 影视与短剧创作的工作台。`, true);
+    const seoTitle = replaceLegacyBrandName(normalizeAppearanceCopy(value?.seoTitle, resolvedBrandName));
+    const seoDescription = replaceLegacyBrandName(normalizeAppearanceCopy(value?.seoDescription, `${resolvedBrandName}，面向 AI 影视与短剧创作的工作台。`, true));
     const seoKeywords = normalizeAppearanceCopy(value?.seoKeywords, "", true);
-    const footerCopyright = normalizeAppearanceCopy(value?.footerCopyright, `© ${new Date().getFullYear()} ${resolvedBrandName}. All rights reserved.`);
+    const footerCopyright = replaceLegacyBrandName(normalizeAppearanceCopy(value?.footerCopyright, `© ${new Date().getFullYear()} ${resolvedBrandName}. All rights reserved.`));
     const icpFilingNumber = normalizeAppearanceCopy(value?.icpFilingNumber, "", true);
     return {
         ...DEFAULT_PUBLIC_APPEARANCE,
         ...value,
         schemaVersion: 9,
-        canvas: { ...DEFAULT_CANVAS_APPEARANCE, ...value?.canvas },
+        canvas: {
+            ...DEFAULT_CANVAS_APPEARANCE,
+            ...value?.canvas,
+            agentName: replaceLegacyBrandName(value?.canvas?.agentName || DEFAULT_CANVAS_APPEARANCE.agentName),
+        },
         brandName: resolvedBrandName,
         brandSlug,
         authHeroTitle,
@@ -159,7 +167,7 @@ export function appearanceLogoURL(appearance: PublicAppearance, theme: "light" |
 }
 
 export function brandStudioLabel(appearance: PublicAppearance) {
-    if (appearance.brandName === DEFAULT_PUBLIC_APPEARANCE.brandName && appearance.brandSlug === DEFAULT_PUBLIC_APPEARANCE.brandSlug) return "YINGCE STUDIO";
+    if (appearance.brandName === DEFAULT_PUBLIC_APPEARANCE.brandName && appearance.brandSlug === DEFAULT_PUBLIC_APPEARANCE.brandSlug) return "JINGCHE STUDIO";
     return appearance.brandSlug.replace(/-+/g, " ").toLocaleUpperCase();
 }
 

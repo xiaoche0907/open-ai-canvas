@@ -14,7 +14,7 @@ import { CanvasAppearanceEditor } from "./components/canvas-appearance-editor";
 import { DEFAULT_CANVAS_APPEARANCE, type CanvasAppearance } from "@/lib/canvas/agent-appearance";
 import { deleteAdminResources } from "@/services/api/admin-storage";
 import { getAdminAppearance, resetAdminAppearance, updateAdminAppearance, uploadAppearanceAsset, type AdminAppearance, type AppearanceAssetSlot } from "@/services/api/appearance";
-import { commitPublicAppearance, DEFAULT_PUBLIC_APPEARANCE } from "@/stores/use-appearance-store";
+import { commitPublicAppearance, DEFAULT_PUBLIC_APPEARANCE, replaceLegacyBrandName } from "@/stores/use-appearance-store";
 import { resolveBackendApiUrl } from "@/stores/use-config-store";
 
 type DraftFiles = Record<AppearanceAssetSlot, File | null>;
@@ -87,9 +87,10 @@ export default function AppearanceSettingsPage() {
     const applySetting = useCallback((value: AdminAppearance) => {
         const themes = value.skinThemes.length ? value.skinThemes.map((theme) => normalizeSkinDefinition(theme)) : [cloneSkinDefinition(DEFAULT_CLASSIC_SKIN)];
         const selectedID = themes.some((theme) => theme.id === value.skinId) ? value.skinId : "classic";
-        setSetting({ ...value, skinThemes: themes, skinId: selectedID });
-        setBrandName(value.brandName);
-        setCanvas(value.canvas || DEFAULT_CANVAS_APPEARANCE);
+        const canvas = { ...DEFAULT_CANVAS_APPEARANCE, ...value.canvas, agentName: replaceLegacyBrandName(value.canvas?.agentName || DEFAULT_CANVAS_APPEARANCE.agentName) };
+        setSetting({ ...value, brandName: replaceLegacyBrandName(value.brandName), canvas, seoTitle: replaceLegacyBrandName(value.seoTitle), seoDescription: replaceLegacyBrandName(value.seoDescription), footerCopyright: replaceLegacyBrandName(value.footerCopyright), skinThemes: themes, skinId: selectedID });
+        setBrandName(replaceLegacyBrandName(value.brandName));
+        setCanvas(canvas);
         setBrandSlug(value.brandSlug);
         setAuthHeroTitle(value.authHeroTitle);
         setAuthHeroDescription(value.authHeroDescription);
@@ -97,10 +98,10 @@ export default function AppearanceSettingsPage() {
         setLogoFrameEnabled(value.logoFrameEnabled);
         setSkinThemes(themes);
         setSkinId(selectedID);
-        setSeoTitle(value.seoTitle);
-        setSeoDescription(value.seoDescription);
+        setSeoTitle(replaceLegacyBrandName(value.seoTitle));
+        setSeoDescription(replaceLegacyBrandName(value.seoDescription));
         setSeoKeywords(value.seoKeywords);
-        setFooterCopyright(value.footerCopyright);
+        setFooterCopyright(replaceLegacyBrandName(value.footerCopyright));
         setIcpFilingEnabled(value.icpFilingEnabled);
         setIcpFilingNumber(value.icpFilingNumber);
         setFiles(EMPTY_FILES);
@@ -240,7 +241,7 @@ export default function AppearanceSettingsPage() {
     const restoreBuiltInAppearance = () => {
         if (!setting?.configured || saving || refreshing || restoring || canvasUploading) return;
         modal.confirm({
-            title: "恢复影策默认品牌标识？",
+            title: "恢复境彻默认品牌标识？",
             content: "品牌名称、英文标识、Logo、画布 Agent 名称/文案/形象、登录页文案、视频、封面、SEO、备案和皮肤主题会立即恢复为项目内置值。已上传文件仍保留在存储资源中，不会被删除。",
             okText: "恢复默认",
             cancelText: "取消",
@@ -255,7 +256,7 @@ export default function AppearanceSettingsPage() {
                     Object.values(inputRefs).forEach((ref) => {
                         if (ref.current) ref.current.value = "";
                     });
-                    message.success("已恢复影策默认品牌标识");
+                    message.success("已恢复境彻默认品牌标识");
                 } catch (error) {
                     message.error(error instanceof Error ? error.message : "恢复默认外观失败");
                     throw error;
@@ -462,7 +463,7 @@ export default function AppearanceSettingsPage() {
                                 </Button>
                             ) : null}
                             <Button icon={<RotateCcw className="size-4" />} loading={restoring} disabled={!setting.configured || saving || refreshing || canvasUploading} onClick={restoreBuiltInAppearance}>
-                                恢复影策默认
+                                恢复境彻默认
                             </Button>
                             <Button icon={<RefreshCw className="size-4" />} loading={refreshing} disabled={saving || restoring || canvasUploading} onClick={requestRefresh}>
                                 刷新状态

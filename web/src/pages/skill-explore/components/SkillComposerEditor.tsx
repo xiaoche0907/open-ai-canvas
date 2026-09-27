@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
-import { Node, mergeAttributes, type JSONContent } from "@tiptap/core";
+import { Extension, Node, mergeAttributes, type JSONContent } from "@tiptap/core";
+import { Plugin } from "@tiptap/pm/state";
+import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { EditorContent, NodeViewWrapper, ReactNodeViewRenderer, useEditor, type NodeViewProps } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Image as ImageIcon, Sparkles, X } from "lucide-react";
@@ -53,6 +55,35 @@ const ContextChip = Node.create({
     addNodeView() { return ReactNodeViewRenderer(ContextChipView); },
 });
 
+const ComposerPlaceholder = Extension.create({
+    name: "skillComposerPlaceholder",
+    addProseMirrorPlugins() {
+        return [new Plugin({
+            props: {
+                decorations(state) {
+                    const paragraph = state.doc.firstChild;
+                    if (!paragraph || paragraph.type.name !== "paragraph") return null;
+                    let hasContent = false;
+                    let hasChip = false;
+                    paragraph.descendants((node) => {
+                        if (node.isText || node.type.name === "hardBreak") hasContent = true;
+                        if (node.type.name === "skillComposerChip") hasChip = true;
+                    });
+                    if (hasContent) return null;
+                    return DecorationSet.create(state.doc, [Decoration.widget(1 + paragraph.content.size, () => {
+                        const placeholder = document.createElement("span");
+                        placeholder.className = "se-composer-placeholder";
+                        placeholder.textContent = hasChip ? "补充你的设计想法…" : "让 境彻 帮你设计一张美丽的婚礼海报";
+                        placeholder.contentEditable = "false";
+                        placeholder.setAttribute("aria-hidden", "true");
+                        return placeholder;
+                    }, { side: 1 })]);
+                },
+            },
+        })];
+    },
+});
+
 function chipContent(skills: SkillReference[], images: ImageAsset[]): JSONContent[] {
     return [
         ...images.map((asset) => ({ type: "skillComposerChip", attrs: { kind: "image", id: asset.id, name: asset.title || "图片", coverUrl: asset.coverUrl, storageKey: asset.data.storageKey || "", width: asset.data.width || 0, height: asset.data.height || 0 } })),
@@ -86,7 +117,7 @@ export function SkillComposerEditor({ message, selectedSkills, selectedImages, o
 
     const editor = useEditor({
         immediatelyRender: false,
-        extensions: [StarterKit, ContextChip],
+        extensions: [StarterKit, ContextChip, ComposerPlaceholder],
         content: composerDocument(message, selectedSkills, selectedImages),
         editorProps: {
             attributes: { class: "se-prompt-rich-input", "aria-label": "设计指令" },
@@ -115,5 +146,5 @@ export function SkillComposerEditor({ message, selectedSkills, selectedImages, o
         editor.commands.setContent(composerDocument(message, selectedSkills, selectedImages), { emitUpdate: false });
     }, [editor, message, selectedSkills, selectedImages]);
 
-    return <EditorContent editor={editor} className={`se-prompt-editor${message ? "" : " is-empty"}${selectedSkills.length || selectedImages.length ? " has-chips" : ""}`} />;
+    return <EditorContent editor={editor} className="se-prompt-editor" />;
 }

@@ -12,10 +12,11 @@
 .se-prompt-line { min-height: 64px; padding: 8px 6px 0; }
 .se-prompt-editor .ProseMirror { min-height: 52px; padding: 2px 0 6px; outline: none; color: var(--foreground); font: inherit; font-size: 14px; line-height: 26px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .se-prompt-editor .ProseMirror p { margin: 0; }
-.se-prompt-editor.is-empty .ProseMirror p::after { content: "让 境彻 帮你设计一张美丽的婚礼海报"; color: var(--muted-foreground); pointer-events: none; }
-.se-prompt-editor.is-empty.has-chips .ProseMirror p::after { content: "补充你的设计想法…"; }
-.se-prompt-editor .se-composer-chip { display: inline-flex; vertical-align: middle; margin-right: 6px; border-radius: 8px; cursor: text; }
+.se-composer-placeholder { color: var(--muted-foreground); pointer-events: none; user-select: none; }
+.se-prompt-editor .se-composer-chip { display: inline-flex; align-items: center; vertical-align: middle; gap: 4px; max-width: min(100%, 155px); height: 23px; min-height: 0; margin-right: 4px; padding: 0 5px; border-radius: 7px; font-size: 12px; line-height: 20px; cursor: text; }
 .se-prompt-editor .se-composer-chip.is-selected, .se-prompt-editor .ProseMirror-selectednode .se-composer-chip { border-color: var(--se-chip-selection); box-shadow: 0 0 0 1px var(--se-chip-selection); }
+.se-prompt-editor .se-prompt-asset-preview { width: 14px; height: 14px; }
+.se-prompt-editor .se-composer-chip .se-prompt-chip-remove, .se-prompt-editor .se-composer-chip button { width: 14px; height: 14px; }
 .se-prompt-toolbar { display: flex; align-items: center; justify-content: space-between; }
 .se-prompt-toolbar-right { display: flex; align-items: center; gap: 8px; }
 .se-prompt-model-picker { width: 168px; max-width: min(40vw, 168px); min-width: 0; }

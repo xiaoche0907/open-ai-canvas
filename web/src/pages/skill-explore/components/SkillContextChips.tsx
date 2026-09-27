@@ -22,7 +22,7 @@ function SkillChip({ skill, onRemove }: { skill: SkillReference; onRemove?: (id:
             <Sparkles size={12} strokeWidth={1.8} aria-hidden="true" />
             <span className="se-prompt-chip-name">{skill.name}</span>
             {onRemove ? (
-                <button type="button" className="se-prompt-chip-remove" aria-label={`移除技能 ${skill.name}`} disabled={removing} onClick={() => setRemoving(true)}>
+                <button type="button" className="se-prompt-chip-remove" aria-label={`移除技能 ${skill.name}`} disabled={removing} onClick={(event) => { event.stopPropagation(); setRemoving(true); }}>
                     <X size={12} strokeWidth={2} aria-hidden="true" />
                 </button>
             ) : null}

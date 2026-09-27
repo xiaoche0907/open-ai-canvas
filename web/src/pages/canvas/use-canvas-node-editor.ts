@@ -10,8 +10,8 @@ import { writeCanvasNodePrompt } from "@/lib/canvas/canvas-node-prompt";
 import { applyBatchPrimaryImage, applyNodeConfigPatch } from "@/lib/canvas/canvas-project-domain";
 import { resetGenerationTaskMetadata } from "@/lib/canvas/canvas-project-generation";
 import { CONTENT_MODERATION_ERROR_CODE, isContentModerationError } from "@/lib/generation-error";
+import { downloadBrowserMedia } from "@/services/browser-download";
 import { ensureCanvasNodeAsset } from "@/services/project-asset-sync";
-import { getMediaBlob } from "@/services/file-storage";
 import { CanvasNodeType, type CanvasFolderStyle, type CanvasFolderTheme, type CanvasNodeData, type CanvasNodeMetadata, type Position } from "@/types/canvas";
 
 type UseCanvasNodeEditorOptions = {
@@ -198,23 +198,16 @@ export function useCanvasNodeEditor({
     }, [canvasId, domainProjectId, message, nodesRef, queryClient, setNodes]);
 
     const downloadNodeImage = useCallback(async (node: CanvasNodeData) => {
-        if ((node.type !== CanvasNodeType.Image && node.type !== CanvasNodeType.Video && node.type !== CanvasNodeType.Audio) || !node.metadata?.content) return;
-        const fileName = buildCanvasMediaDownloadFileName(canvasTitle, node);
-        if (node.metadata?.storageKey) {
-            try {
-                const blob = await getMediaBlob(node.metadata.storageKey);
-                if (blob) {
-                    await downloadMediaFile(blob, fileName);
-                    return;
-                }
-            } catch {
-                // Fall back to content URL
-            }
-        }
+        const supported = node.type === CanvasNodeType.Image || node.type === CanvasNodeType.Video || node.type === CanvasNodeType.Audio;
+        const content = node.metadata?.content?.trim();
+        const storageKey = node.metadata?.storageKey?.trim();
+        if (!supported || (!content && !storageKey)) return;
         try {
-            await downloadMediaFile(node.metadata.content, fileName);
+            const downloadName = buildCanvasMediaDownloadFileName(canvasTitle, node);
+            if (storageKey) await downloadBrowserMedia({ storageKey, url: content, fileName: downloadName });
+            else await downloadMediaFile(content, downloadName);
         } catch (error) {
-            message.error(error instanceof Error ? error.message : "下载媒体失败，请重试");
+            message.error(error instanceof Error ? error.message : "下载失败");
         }
     }, [canvasTitle, message]);
 

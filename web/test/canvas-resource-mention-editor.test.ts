@@ -122,6 +122,8 @@ describe("canvas resource mention editor", () => {
         expect(component).toContain("slash.start + 1 + slash.query.length");
         expect(component).toContain("buildSkillMentionReferences(availableSlashSkills)");
         expect(component).toContain("[/、]([^\\s/、]*)$");
+        // 保留主分支已恢复的固定 Skills 提示，不能因合并旧分支退回失效的外观配置断言。
+        expect(source("../src/lib/canvas/agent-appearance.ts")).toContain("用 / 或 、 引用 Skills");
         expect(source("../src/components/canvas/canvas-cloud-agent-panel.tsx")).toContain("用 / 或 、 引用 Skills");
     });
 
@@ -138,9 +140,8 @@ describe("canvas resource mention editor", () => {
         expect(component).toContain('chip.style.setProperty("--canvas-skill-mention-color", skillMentionColor(reference))');
         expect(chat).toContain('sendOnEnter={canSubmit ? "both" : false}');
         expect(chat).toContain("agent-composer-resize-handle");
-        expect(chat).toContain("Enter 发送 · Shift+Enter 换行");
-        expect(css).toContain(".agent-composer-send-hint-full");
-        expect(css).toContain(".agent-composer-send-hint-compact");
+        expect(chat).toContain("Enter 或 ⌘/Ctrl+Enter 发送");
+        expect(chat).toContain('title={canStop ? "插话：Agent 下一次开口时看到它"');
         expect(css).toContain(".agent-composer-prompt-scroll");
         expect(css).not.toContain(".agent-tool-row:hover");
     });

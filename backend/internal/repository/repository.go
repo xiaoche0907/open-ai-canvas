@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"infinite-canvas/backend/internal/database"
 	"infinite-canvas/backend/internal/model"
 
 	"gorm.io/gorm"
@@ -73,32 +74,7 @@ func (r *Repository) ReleaseTaskLease(id string, owner string) error {
 // NextPrefixedID 在数据库事务中递增序列，避免 UUID/父子字符串拼接导致的不可读和不可排序 ID。
 // prefix 只决定展示前缀，关联关系仍由独立外键维护。
 func (r *Repository) NextPrefixedID(prefix string) (string, error) {
-	return r.nextPrefixedID(r.db, prefix)
-}
-
-func (r *Repository) nextPrefixedID(db *gorm.DB, prefix string) (string, error) {
-	prefix = strings.ToUpper(strings.TrimSpace(prefix))
-	if prefix == "" || len(prefix) > 16 {
-		return "", errors.New("invalid id prefix")
-	}
-	sequence := "id:" + prefix
-	var item model.IDSequence
-	err := db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&model.IDSequence{Name: sequence, UpdatedAt: time.Now()}).Error; err != nil {
-			return err
-		}
-		if err := tx.Model(&model.IDSequence{}).Where("name = ?", sequence).Updates(map[string]any{
-			"value":      gorm.Expr("value + ?", 1),
-			"updated_at": time.Now(),
-		}).Error; err != nil {
-			return err
-		}
-		return tx.First(&item, "name = ?", sequence).Error
-	})
-	if err != nil {
-		return "", err
-	}
-	return fmt.Sprintf("%s_%06d", prefix, item.Value), nil
+	return database.AllocatePrefixedID(r.db, prefix)
 }
 
 func (r *Repository) UserStorageUsage(userID string) (UserStorageUsage, error) {
@@ -110,7 +86,7 @@ func (r *Repository) UserStorageUsage(userID string) (UserStorageUsage, error) {
 			(SELECT COUNT(*) FROM canvas_projects WHERE user_id = ?) AS canvas_count,
 			(SELECT COALESCE(SUM(length(CAST(COALESCE(payload_json, '') AS BLOB))), 0) FROM canvas_projects WHERE user_id = ?) AS canvas_bytes,
 			(SELECT COUNT(*) FROM tasks WHERE user_id = ?) AS task_count,
-			(SELECT COALESCE(SUM(length(CAST(COALESCE(prompt, '') AS BLOB)) + length(CAST(COALESCE(input_json, '') AS BLOB)) + length(CAST(COALESCE(result_json, '') AS BLOB)) + length(CAST(COALESCE(text_draft, '') AS BLOB)) + length(CAST(COALESCE(error, '') AS BLOB))), 0) FROM tasks WHERE user_id = ?)
+			(SELECT COALESCE(SUM(length(CAST(COALESCE(prompt, '') AS BLOB)) + length(CAST(COALESCE(input_json, '') AS BLOB)) + length(CAST(COALESCE(result_json, '') AS BLOB)) + length(CAST(COALESCE(media_recovery_json, '') AS BLOB)) + length(CAST(COALESCE(text_draft, '') AS BLOB)) + length(CAST(COALESCE(error, '') AS BLOB))), 0) FROM tasks WHERE user_id = ?)
 			+ (SELECT COALESCE(SUM(length(CAST(COALESCE(message, '') AS BLOB)) + length(CAST(COALESCE(payload, '') AS BLOB))), 0) FROM task_logs WHERE user_id = ?)
 			+ (SELECT COALESCE(SUM(length(CAST(COALESCE(url, '') AS BLOB)) + length(CAST(COALESCE(payload, '') AS BLOB))), 0) FROM results WHERE user_id = ?)
 			+ (SELECT COALESCE(SUM(byte_count), 0) FROM task_text_delta WHERE user_id = ?)
@@ -536,6 +512,12 @@ func (r *Repository) UpdateTaskProviderProgress(id string, progress int) error {
 }
 
 func (r *Repository) SaveTaskCompletion(task *model.Task, expected model.TaskStatus, results []model.Result) error {
+	return r.SaveTaskCompletionWithRegistration(task, expected, results, nil)
+}
+
+// Registration and terminal success commit together; a failed asset write leaves
+// the task recoverable and never exposes a false success to the canvas.
+func (r *Repository) SaveTaskCompletionWithRegistration(task *model.Task, expected model.TaskStatus, results []model.Result, register func(*Repository) error) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		updated := taskLeaseWriter(tx.Model(&model.Task{}), task.LeaseOwner).
 			Where("id = ? AND status = ?", task.ID, expected).
@@ -550,6 +532,9 @@ func (r *Repository) SaveTaskCompletion(task *model.Task, expected model.TaskSta
 			if err := tx.Create(&results[index]).Error; err != nil {
 				return err
 			}
+		}
+		if register != nil {
+			return register(New(tx))
 		}
 		return nil
 	})
@@ -696,7 +681,7 @@ func (r *Repository) Tasks(userID string, limit int, projectID string, activeOnl
 	if limit <= 0 || limit > 100 {
 		limit = 50
 	}
-	query := r.db.Select("id", "project_id", "type", "status", "stage", "progress", "prompt", "operation", "provider", "model", "input_json", "result_json", "billing_order_id", "provider_request_id", "provider_cancel_status", "provider_cancel_error", "provider_cancel_attempts", "provider_cancel_requested_at", "provider_cancelled_at", "provider_cancel_next_check_at", "attempts", "started_at", "completed_at", "created_at", "updated_at", "agent_run_id", "generation_id", "approval_id", "authorized_charge_microcredits", "execution_diagnostic_json", "cancellation_source", "cancellation_actor_id", "cancellation_requested_at").
+	query := r.db.Select("id", "project_id", "type", "status", "stage", "media_stage", "media_recovery_json", "progress", "prompt", "operation", "provider", "model", "input_json", "result_json", "billing_order_id", "provider_request_id", "provider_cancel_status", "provider_cancel_error", "provider_cancel_attempts", "provider_cancel_requested_at", "provider_cancelled_at", "provider_cancel_next_check_at", "attempts", "started_at", "completed_at", "created_at", "updated_at", "agent_run_id", "generation_id", "approval_id", "authorized_charge_microcredits", "execution_diagnostic_json", "cancellation_source", "cancellation_actor_id", "cancellation_requested_at").
 		Where("user_id = ?", userID)
 	if strings.TrimSpace(projectID) != "" {
 		query = query.Where("project_id = ?", strings.TrimSpace(projectID))
@@ -822,6 +807,17 @@ func (r *Repository) SystemSetting(key string) (*model.SystemSetting, error) {
 	var setting model.SystemSetting
 	if err := r.db.First(&setting, "key = ?", key).Error; err != nil {
 		return nil, err
+	}
+	return &setting, nil
+}
+
+func (r *Repository) SystemSettingOptional(key string) (*model.SystemSetting, error) {
+	var setting model.SystemSetting
+	if err := r.db.Where("key = ?", key).Limit(1).Find(&setting).Error; err != nil {
+		return nil, err
+	}
+	if setting.Key == "" {
+		return nil, nil
 	}
 	return &setting, nil
 }
